@@ -100,7 +100,68 @@ export default function UsersClient({ users }: { users: User[] }) {
         <CardHeader>
           <CardTitle>Todos os Usuários</CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+
+        {/* Mobile: cards */}
+        <div className="md:hidden divide-y divide-border">
+          {users.length === 0 ? (
+            <p className="text-center text-muted-foreground py-12 text-sm">Nenhum usuário encontrado</p>
+          ) : (
+            users.map((user) => {
+              const isNew = new Date(user.createdAt) >= days30;
+              return (
+                <div key={user.id} className="px-4 py-4 flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary flex-shrink-0">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium truncate">{user.name}</p>
+                      {isNew && (
+                        <Badge className="text-[10px] px-1.5 py-0 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/10">
+                          novo
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{user.email}</p>
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                      <Badge className="text-[9px] px-1 py-0 h-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">
+                        Zupet
+                      </Badge>
+                      {user.isWalker && (
+                        <Badge className="text-[9px] px-1 py-0 h-4 bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/10">
+                          Walker
+                        </Badge>
+                      )}
+                      {user.pets > 0 && (
+                        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">
+                          {user.pets} pet{user.pets !== 1 ? "s" : ""}
+                        </Badge>
+                      )}
+                      {user.platform === "android" && (
+                        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-emerald-500/30 text-emerald-700 bg-emerald-500/5">
+                          Android
+                        </Badge>
+                      )}
+                      {user.platform === "ios" && (
+                        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-slate-400/30 text-slate-600 bg-slate-500/5">
+                          iOS
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1.5 text-[11px] text-muted-foreground flex-wrap">
+                      {user.location !== "—" && <span>{user.location}</span>}
+                      <span>{new Date(user.createdAt).toLocaleDateString("pt-BR")}</span>
+                      {user.appVersion && <span className="font-mono">v{user.appVersion}</span>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop: tabela */}
+        <CardContent className="p-0 hidden md:block">
           <Table>
             <TableHeader>
               <TableRow>
