@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
-import { Users, Calendar, Star, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Users, Calendar, Star, Zap, ChevronLeft, ChevronRight, Crown, X } from "lucide-react";
 
 const PAGE_SIZE = 20;
 
@@ -23,7 +23,125 @@ type Walker = {
   hasZupet: boolean;
 };
 
-export default function WalkersClient({ walkers }: { walkers: Walker[] }) {
+function PlanModal({
+  walker,
+  onClose,
+  onConfirm,
+}: {
+  walker: Walker;
+  onClose: () => void;
+  onConfirm: (walkerId: string, plan: "free" | "pro", note: string) => void;
+}) {
+  const [note, setNote] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const targetPlan = walker.plan === "pro" ? "free" : "pro";
+
+  function handleConfirm() {
+    startTransition(async () => {
+      await onConfirm(walker.id, targetPlan, note);
+      onClose();
+    });
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
+      <div className="bg-background border border-border rounded-xl shadow-xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <h2 className="font-heading text-lg font-bold">
+              {targetPlan === "pro" ? "Promover para Pro" : "Revogar plano Pro"}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Walker: <span className="font-medium text-foreground">{walker.name}</span>
+            </p>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {targetPlan === "pro" && (
+          <div className="bg-violet-500/10 border border-violet-500/20 rounded-lg px-4 py-3 mb-4 text-sm text-violet-700 dark:text-violet-400">
+            Isso vai definir <strong>plan = &apos;pro&apos;</strong> no perfil do walker e registrar uma assinatura manual em <strong>walker_subscriptions</strong>.
+          </div>
+        )}
+        {targetPlan === "free" && (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-3 mb-4 text-sm text-amber-700 dark:text-amber-400">
+            Isso vai reverter o walker para <strong>plan = &apos;free&apos;</strong>. O acesso Pro será removido imediatamente.
+          </div>
+        )}
+
+        <div className="mb-4">
+          <label className="text-xs font-medium text-muted-foreground block mb-1.5">MOTIVO / NOTA INTERNA</label>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={targetPlan === "pro" ? "Ex: beta tester, teste de campanha, parceiro..." : "Ex: período de teste encerrado..."}
+            rows={3}
+            className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </div>
+
+        <div className="flex gap-3 justify-end">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:bg-secondary transition-colors">
+            Cancelar
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={isPending}
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+              targetPlan === "pro"
+                ? "bg-violet-600 text-white hover:bg-violet-700"
+                : "bg-destructive text-destructive-foreground hover:opacity-90"
+            }`}
+          >
+            {isPending ? "Salvando…" : targetPlan === "pro" ? "Promover para Pro" : "Revogar Pro"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlanButton({ walker, onPlanChange }: { walker: Walker; onPlanChange: (id: string, plan: "free" | "pro") => void }) {
+  const [showModal, setShowModal] = useState(false);
+
+  async function handleConfirm(walkerId: string, plan: "free" | "pro", note: string) {
+    await fetch("/api/walker/walkers/set-plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ walkerId, plan, note }),
+    });
+    onPlanChange(walkerId, plan);
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setShowModal(true)}
+        title={walker.plan === "pro" ? "Revogar Pro" : "Promover para Pro"}
+        className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium border transition-colors ${
+          walker.plan === "pro"
+            ? "bg-violet-500/10 text-violet-700 border-violet-500/30 hover:bg-rose-500/10 hover:text-rose-700 hover:border-rose-500/30"
+            : "bg-secondary text-muted-foreground border-border hover:bg-violet-500/10 hover:text-violet-700 hover:border-violet-500/30"
+        }`}
+      >
+        <Crown className="h-3 w-3" />
+        {walker.plan === "pro" ? "Pro" : "Free"}
+      </button>
+      {showModal && (
+        <PlanModal
+          walker={walker}
+          onClose={() => setShowModal(false)}
+          onConfirm={handleConfirm}
+        />
+      )}
+    </>
+  );
+}
+
+export default function WalkersClient({ walkers: initial }: { walkers: Walker[] }) {
+  const [walkers, setWalkers] = useState(initial);
   const [page, setPage] = useState(1);
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -32,6 +150,10 @@ export default function WalkersClient({ walkers }: { walkers: Walker[] }) {
   const proWalkers = walkers.filter((w) => w.plan === "pro").length;
   const totalPages = Math.max(1, Math.ceil(walkers.length / PAGE_SIZE));
   const paginatedWalkers = walkers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  function handlePlanChange(id: string, plan: "free" | "pro") {
+    setWalkers((prev) => prev.map((w) => w.id === id ? { ...w, plan } : w));
+  }
 
   return (
     <div className="space-y-6">
@@ -97,7 +219,10 @@ export default function WalkersClient({ walkers }: { walkers: Walker[] }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Todos os Walkers</CardTitle>
+          <div className="flex items-center justify-between gap-4">
+            <CardTitle>Todos os Walkers</CardTitle>
+            <p className="text-xs text-muted-foreground">Clique no badge de plano para promover / revogar Pro</p>
+          </div>
         </CardHeader>
 
         {/* Mobile: cards */}
@@ -131,15 +256,7 @@ export default function WalkersClient({ walkers }: { walkers: Walker[] }) {
                       <Badge className="text-[9px] px-1 py-0 h-4 bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/10">
                         Walker
                       </Badge>
-                      {walker.plan === "pro" ? (
-                        <Badge className="text-[9px] px-1 py-0 h-4 bg-violet-500/10 text-violet-700 border-violet-500/30 hover:bg-violet-500/10">
-                          Pro
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 text-muted-foreground">
-                          Free
-                        </Badge>
-                      )}
+                      <PlanButton walker={walker} onPlanChange={handlePlanChange} />
                       {walker.active ? (
                         <Badge className="text-[9px] px-1 py-0 h-4 bg-emerald-500/10 text-emerald-700 border-emerald-500/30 hover:bg-emerald-500/10">
                           Ativo
@@ -219,15 +336,7 @@ export default function WalkersClient({ walkers }: { walkers: Walker[] }) {
                       <TableCell className="text-sm text-muted-foreground">{walker.email}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{walker.location}</TableCell>
                       <TableCell>
-                        {walker.plan === "pro" ? (
-                          <Badge className="bg-violet-500/10 text-violet-700 border-violet-500/30 hover:bg-violet-500/10 text-xs">
-                            Pro
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-xs text-muted-foreground">
-                            Free
-                          </Badge>
-                        )}
+                        <PlanButton walker={walker} onPlanChange={handlePlanChange} />
                       </TableCell>
                       <TableCell>
                         {walker.rating !== null ? (
