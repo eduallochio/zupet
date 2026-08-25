@@ -39,6 +39,7 @@ import {
   Star,
   Banknote,
   AlertTriangle,
+  CreditCard,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -118,7 +119,15 @@ const walkerGroups: NavGroup[] = [
       { href: "/dashboard/walker/passeios", label: "Passeios", icon: Route },
       { href: "/dashboard/walker/servicos", label: "Serviços", icon: Wrench },
       { href: "/dashboard/walker/avaliacoes", label: "Avaliações", icon: Star },
-      { href: "/dashboard/walker/pagamentos", label: "Pagamentos", icon: Banknote },
+      { href: "/dashboard/walker/pagamentos", label: "Pgtos Tutor→Walker", icon: Banknote },
+    ],
+  },
+  {
+    label: "Financeiro",
+    icon: CreditCard,
+    defaultOpen: false,
+    items: [
+      { href: "/dashboard/walker/assinaturas", label: "Assinaturas Pro", icon: CreditCard },
     ],
   },
   {
