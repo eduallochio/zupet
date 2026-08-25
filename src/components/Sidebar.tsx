@@ -45,14 +45,14 @@ import { Separator } from "@/components/ui/separator";
 type NavItem = { href: string; label: string; icon: React.ElementType };
 type NavGroup = { label: string; icon: React.ElementType; items: NavItem[]; defaultOpen?: boolean };
 
-const pinnedItems: NavItem[] = [
-  { href: "/dashboard", label: "Visão Geral Zupet", icon: LayoutDashboard },
-  { href: "/dashboard/walker/overview", label: "Visão Geral Walker", icon: Footprints },
+// ── ZUPET ────────────────────────────────────────────────────────────────────
+const zupetPinnedItems: NavItem[] = [
+  { href: "/dashboard", label: "Visão Geral", icon: LayoutDashboard },
   { href: "/dashboard/users", label: "Usuários", icon: Users },
   { href: "/dashboard/pets", label: "Pets", icon: PawPrint },
 ];
 
-const navGroups: NavGroup[] = [
+const zupetGroups: NavGroup[] = [
   {
     label: "Analytics",
     icon: BarChart3,
@@ -90,20 +90,6 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "Walker",
-    icon: Footprints,
-    defaultOpen: false,
-    items: [
-      { href: "/dashboard/walker/walkers", label: "Walkers", icon: Users },
-      { href: "/dashboard/walker/passeios", label: "Passeios", icon: Route },
-      { href: "/dashboard/walker/servicos", label: "Serviços", icon: Wrench },
-      { href: "/dashboard/walker/avaliacoes", label: "Avaliações", icon: Star },
-      { href: "/dashboard/walker/pagamentos", label: "Pagamentos", icon: Banknote },
-      { href: "/dashboard/walker/erros", label: "Erros", icon: AlertTriangle },
-      { href: "/dashboard/walker/landing", label: "Landing Page", icon: Globe },
-    ],
-  },
-  {
     label: "Plataforma",
     icon: ShieldCheck,
     defaultOpen: false,
@@ -113,6 +99,43 @@ const navGroups: NavGroup[] = [
       { href: "/dashboard/stores", label: "Lojas", icon: Store },
       { href: "/dashboard/landing", label: "Landing Page", icon: Globe },
       { href: "/dashboard/deletions", label: "Exclusões", icon: Trash2 },
+    ],
+  },
+];
+
+// ── WALKER ───────────────────────────────────────────────────────────────────
+const walkerPinnedItems: NavItem[] = [
+  { href: "/dashboard/walker/overview", label: "Visão Geral", icon: LayoutDashboard },
+];
+
+const walkerGroups: NavGroup[] = [
+  {
+    label: "Walkers",
+    icon: Users,
+    defaultOpen: false,
+    items: [
+      { href: "/dashboard/walker/walkers", label: "Lista de Walkers", icon: Users },
+      { href: "/dashboard/walker/passeios", label: "Passeios", icon: Route },
+      { href: "/dashboard/walker/servicos", label: "Serviços", icon: Wrench },
+      { href: "/dashboard/walker/avaliacoes", label: "Avaliações", icon: Star },
+      { href: "/dashboard/walker/pagamentos", label: "Pagamentos", icon: Banknote },
+    ],
+  },
+  {
+    label: "Analytics Walker",
+    icon: BarChart3,
+    defaultOpen: false,
+    items: [
+      { href: "/dashboard/walker/analytics", label: "Métricas", icon: BarChart3 },
+      { href: "/dashboard/walker/erros", label: "Erros", icon: AlertTriangle },
+    ],
+  },
+  {
+    label: "Plataforma Walker",
+    icon: Globe,
+    defaultOpen: false,
+    items: [
+      { href: "/dashboard/walker/landing", label: "Landing Page", icon: Globe },
     ],
   },
 ];
@@ -215,19 +238,42 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
-        {/* Itens fixos */}
-        {pinnedItems.map((item) => (
+
+        {/* ── Seção ZUPET ── */}
+        <div className="px-3 pt-1 pb-1.5">
+          <div className="flex items-center gap-2">
+            <Image src="/icon.png" alt="" width={13} height={13} className="rounded opacity-50 flex-shrink-0" />
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Zupet</span>
+          </div>
+        </div>
+
+        {zupetPinnedItems.map((item) => (
           <NavLink key={item.href} {...item} onClick={onClose} />
         ))}
+        {zupetGroups.map((group) => (
+          <NavGroupSection key={group.label} group={group} onClose={onClose} />
+        ))}
 
-        <div className="py-1.5">
+        {/* ── Separador ── */}
+        <div className="py-2">
           <Separator className="opacity-30" />
         </div>
 
-        {/* Grupos colapsáveis */}
-        {navGroups.map((group) => (
+        {/* ── Seção WALKER ── */}
+        <div className="px-3 pt-1 pb-1.5">
+          <div className="flex items-center gap-2">
+            <Image src="/walker-icon.png" alt="" width={13} height={13} className="opacity-60 flex-shrink-0" />
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Walker</span>
+          </div>
+        </div>
+
+        {walkerPinnedItems.map((item) => (
+          <NavLink key={item.href} {...item} onClick={onClose} />
+        ))}
+        {walkerGroups.map((group) => (
           <NavGroupSection key={group.label} group={group} onClose={onClose} />
         ))}
+
       </nav>
 
       <Separator className="opacity-50" />
