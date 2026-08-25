@@ -8,16 +8,20 @@ async function getWalkers() {
     { data: walkers },
     { data: services },
     { data: { users: authUsers } },
+    { data: zupetProfiles },
   ] = await Promise.all([
     supabaseAdmin
       .from("walker_profiles")
       .select("id, user_id, name, city, state, plan, rating, active, created_at"),
     supabaseAdmin.from("walker_services").select("walker_id, active"),
     supabaseAdmin.auth.admin.listUsers(),
+    supabaseAdmin.from("user_profiles").select("user_id"),
   ]);
 
   const emailMap: Record<string, string> = {};
   for (const u of authUsers) emailMap[u.id] = u.email ?? "—";
+
+  const zupetUserIds = new Set((zupetProfiles ?? []).map((p) => p.user_id));
 
   const serviceCountMap: Record<string, number> = {};
   for (const s of services ?? []) {
@@ -39,6 +43,7 @@ async function getWalkers() {
       services: serviceCountMap[w.id] ?? 0,
       active: w.active ?? false,
       createdAt: w.created_at,
+      hasZupet: zupetUserIds.has(w.user_id),
     }));
 }
 
