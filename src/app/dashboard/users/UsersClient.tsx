@@ -16,6 +16,7 @@ type User = {
   createdAt: string;
   platform: "android" | "ios" | null;
   appVersion: string | null;
+  isWalker: boolean;
 };
 
 export default function UsersClient({ users }: { users: User[] }) {
@@ -132,6 +133,16 @@ export default function UsersClient({ users }: { users: User[] }) {
                           <div>
                             <p className="text-sm font-medium">{user.name}</p>
                             <p className="text-xs text-muted-foreground font-mono">{user.id.slice(0, 8)}…</p>
+                            <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                              <Badge className="text-[9px] px-1 py-0 h-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">
+                                Zupet
+                              </Badge>
+                              {user.isWalker && (
+                                <Badge className="text-[9px] px-1 py-0 h-4 bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/10">
+                                  Walker
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </TableCell>

@@ -4,11 +4,14 @@ import UsersClient from "./UsersClient";
 export const revalidate = 60;
 
 async function getUsers() {
-  const [{ data: profiles }, { data: petRows }, { data: { users: authUsers } }] = await Promise.all([
+  const [{ data: profiles }, { data: petRows }, { data: { users: authUsers } }, { data: walkerProfiles }] = await Promise.all([
     supabaseAdmin.from("user_profiles").select("user_id, name, city, state, platform, app_version, updated_at"),
     supabaseAdmin.from("pets").select("user_id"),
     supabaseAdmin.auth.admin.listUsers(),
+    supabaseAdmin.from("walker_profiles").select("user_id"),
   ]);
+
+  const walkerUserIds = new Set((walkerProfiles ?? []).map((w) => w.user_id));
 
   const profileMap: Record<string, typeof profiles extends (infer T)[] | null ? T : never> = {};
   for (const p of profiles ?? []) profileMap[p.user_id] = p;
@@ -32,6 +35,7 @@ async function getUsers() {
         createdAt: u.created_at,
         platform: (profile?.platform as "android" | "ios" | null) ?? null,
         appVersion: profile?.app_version ?? null,
+        isWalker: walkerUserIds.has(u.id),
       };
     });
 }

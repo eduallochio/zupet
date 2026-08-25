@@ -4,10 +4,13 @@ import OverviewClient from "./OverviewClient";
 export const revalidate = 60; // ISR: regenera a página a cada 60 segundos
 
 async function getStats() {
-  const [profilesResult, petsResult, { data: { users: authUsers } }] = await Promise.all([
+  const [profilesResult, petsResult, { data: { users: authUsers } }, walkerProfilesResult, walkSessionsResult, walkerRatingsResult] = await Promise.all([
     supabaseAdmin.from("user_profiles").select("user_id, name, updated_at"),
     supabaseAdmin.from("pets").select("id, user_id, species, created_at"),
     supabaseAdmin.auth.admin.listUsers(),
+    supabaseAdmin.from("walker_profiles").select("id, name, plan, active, created_at"),
+    supabaseAdmin.from("walk_sessions").select("id, ended_at, distance_meters"),
+    supabaseAdmin.from("walker_ratings").select("id, rating"),
   ]);
 
   const now = new Date();
@@ -60,6 +63,20 @@ async function getStats() {
     value: emailMap[p.user_id] ?? "—",
   }));
 
+  // Walker stats
+  const walkerProfiles = walkerProfilesResult.data ?? [];
+  const walkSessions = walkSessionsResult.data ?? [];
+  const walkerRatings = walkerRatingsResult.data ?? [];
+
+  const totalWalkers = walkerProfiles.length;
+  const activeWalkers = walkerProfiles.filter((w) => w.active).length;
+  const proWalkers = walkerProfiles.filter((w) => w.plan === "pro").length;
+  const totalSessions = walkSessions.filter((s) => s.ended_at !== null).length;
+  const totalKm = Math.round(walkSessions.reduce((acc, s) => acc + (s.distance_meters ?? 0), 0) / 1000);
+  const avgRating = walkerRatings.length > 0
+    ? +(walkerRatings.reduce((acc, r) => acc + (r.rating ?? 0), 0) / walkerRatings.length).toFixed(1)
+    : 0;
+
   return {
     totalUsers: authUsers.length,
     totalPets: pets.length,
@@ -70,6 +87,14 @@ async function getStats() {
     speciesData,
     chartData,
     recentUsers,
+    walkerStats: {
+      totalWalkers,
+      activeWalkers,
+      proWalkers,
+      totalSessions,
+      totalKm,
+      avgRating,
+    },
   };
 }
 
