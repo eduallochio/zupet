@@ -262,7 +262,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         {/* ── Seção WALKER ── */}
         <div className="px-3 pt-1 pb-1.5">
           <div className="flex items-center gap-2">
-            <Image src="/walker-icon.png" alt="" width={13} height={13} className="opacity-60 flex-shrink-0" />
+            <Image src="/walker-icon.png" alt="" width={13} height={13} className="rounded-sm opacity-70 flex-shrink-0" />
             <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Walker</span>
           </div>
         </div>

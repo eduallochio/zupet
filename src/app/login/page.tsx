@@ -109,8 +109,8 @@ export default function LoginPage() {
               <Image src="/icon.png" width={56} height={56} alt="Zupet" className="w-full h-full object-cover" />
             </div>
             <div className="text-muted-foreground text-xl font-light select-none">+</div>
-            <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-md bg-white flex items-center justify-center p-2">
-              <Image src="/walker-icon.png" width={44} height={44} alt="Zupet Walker" className="object-contain" />
+            <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-md">
+              <Image src="/walker-icon.png" width={56} height={56} alt="Zupet Walker" className="w-full h-full object-cover" />
             </div>
           </div>
           <h1 className="font-heading text-2xl font-bold text-foreground">Zupet Admin</h1>
