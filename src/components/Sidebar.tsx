@@ -46,7 +46,8 @@ type NavItem = { href: string; label: string; icon: React.ElementType };
 type NavGroup = { label: string; icon: React.ElementType; items: NavItem[]; defaultOpen?: boolean };
 
 const pinnedItems: NavItem[] = [
-  { href: "/dashboard", label: "Visão Geral", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Visão Geral Zupet", icon: LayoutDashboard },
+  { href: "/dashboard/walker/overview", label: "Visão Geral Walker", icon: Footprints },
   { href: "/dashboard/users", label: "Usuários", icon: Users },
   { href: "/dashboard/pets", label: "Pets", icon: PawPrint },
 ];
@@ -93,7 +94,6 @@ const navGroups: NavGroup[] = [
     icon: Footprints,
     defaultOpen: false,
     items: [
-      { href: "/dashboard/walker/overview", label: "Visão Geral", icon: LayoutDashboard },
       { href: "/dashboard/walker/walkers", label: "Walkers", icon: Users },
       { href: "/dashboard/walker/passeios", label: "Passeios", icon: Route },
       { href: "/dashboard/walker/servicos", label: "Serviços", icon: Wrench },
