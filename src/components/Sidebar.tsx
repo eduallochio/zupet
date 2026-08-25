@@ -100,6 +100,7 @@ const navGroups: NavGroup[] = [
       { href: "/dashboard/walker/avaliacoes", label: "Avaliações", icon: Star },
       { href: "/dashboard/walker/pagamentos", label: "Pagamentos", icon: Banknote },
       { href: "/dashboard/walker/erros", label: "Erros", icon: AlertTriangle },
+      { href: "/dashboard/walker/landing", label: "Landing Page", icon: Globe },
     ],
   },
   {
