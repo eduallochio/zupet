@@ -3,61 +3,43 @@ import PagamentosClient from "./PagamentosClient";
 
 export const revalidate = 60;
 
-async function getPagamentos() {
-  const [{ data: payments }, { data: walkers }] = await Promise.all([
+async function getData() {
+  const [
+    { data: payments },
+    { data: walkers },
+    { data: { users: authUsers } },
+  ] = await Promise.all([
     supabaseAdmin
       .from("walker_payments")
-      .select(
-        "id, walker_id, amount, status, service_type, description, paid_at, created_at"
-      )
-      .order("created_at", { ascending: false })
-      .limit(20),
+      .select("id, walker_id, owner_id, amount, billing_type, period_ref, status, paid_at, service_type, description, notes, created_at")
+      .order("created_at", { ascending: false }),
     supabaseAdmin.from("walker_profiles").select("id, name"),
+    supabaseAdmin.auth.admin.listUsers(),
   ]);
 
   const walkerMap: Record<string, string> = {};
-  for (const w of walkers ?? []) {
-    walkerMap[w.id] = w.name ?? "—";
-  }
+  for (const w of walkers ?? []) walkerMap[w.id] = w.name ?? "—";
 
-  // Compute totals from all payments (re-query without limit for accurate totals)
-  const { data: allPayments } = await supabaseAdmin
-    .from("walker_payments")
-    .select("amount, status");
+  const emailMap: Record<string, string> = {};
+  for (const u of authUsers) emailMap[u.id] = u.email ?? "—";
 
-  const totalAmount = (allPayments ?? []).reduce(
-    (sum, p) => sum + (p.amount ?? 0),
-    0
-  );
-  const paidAmount = (allPayments ?? [])
-    .filter((p) => p.status === "paid")
-    .reduce((sum, p) => sum + (p.amount ?? 0), 0);
-  const pendingAmount = (allPayments ?? [])
-    .filter((p) => p.status === "pending")
-    .reduce((sum, p) => sum + (p.amount ?? 0), 0);
-
-  const recentPayments = (payments ?? []).map((p) => ({
+  return (payments ?? []).map((p) => ({
     id: p.id,
-    walkerId: p.walker_id,
     walkerName: walkerMap[p.walker_id] ?? "—",
+    ownerEmail: emailMap[p.owner_id] ?? "—",
     amount: p.amount ?? 0,
-    status: p.status ?? "pending",
+    billingType: p.billing_type ?? "per_session",
+    periodRef: p.period_ref ?? null,
+    status: p.status as "pending" | "paid" | "cancelled",
+    paidAt: p.paid_at ?? null,
     serviceType: p.service_type ?? null,
     description: p.description ?? null,
-    paidAt: p.paid_at ?? null,
+    notes: p.notes ?? null,
     createdAt: p.created_at,
   }));
-
-  return {
-    totalAmount,
-    paidAmount,
-    pendingAmount,
-    totalCount: (allPayments ?? []).length,
-    recentPayments,
-  };
 }
 
 export default async function PagamentosPage() {
-  const data = await getPagamentos();
-  return <PagamentosClient data={data} />;
+  const payments = await getData();
+  return <PagamentosClient payments={payments} />;
 }
