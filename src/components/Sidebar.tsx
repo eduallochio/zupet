@@ -40,6 +40,7 @@ import {
   Banknote,
   AlertTriangle,
   CreditCard,
+  Ticket,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -128,6 +129,7 @@ const walkerGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { href: "/dashboard/walker/assinaturas", label: "Assinaturas Pro", icon: CreditCard },
+      { href: "/dashboard/walker/cupons", label: "Cupons", icon: Ticket },
     ],
   },
   {
