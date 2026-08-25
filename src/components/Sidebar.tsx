@@ -38,6 +38,7 @@ import {
   Wrench,
   Star,
   Banknote,
+  AlertTriangle,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -97,6 +98,7 @@ const navGroups: NavGroup[] = [
       { href: "/dashboard/walker/servicos", label: "Serviços", icon: Wrench },
       { href: "/dashboard/walker/avaliacoes", label: "Avaliações", icon: Star },
       { href: "/dashboard/walker/pagamentos", label: "Pagamentos", icon: Banknote },
+      { href: "/dashboard/walker/erros", label: "Erros", icon: AlertTriangle },
     ],
   },
   {
