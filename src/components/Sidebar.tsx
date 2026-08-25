@@ -33,6 +33,10 @@ import {
   ClipboardList,
   ChevronDown,
   Heart,
+  Footprints,
+  Route,
+  Wrench,
+  Star,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -80,6 +84,17 @@ const navGroups: NavGroup[] = [
       { href: "/dashboard/feedings", label: "Alimentação", icon: Utensils },
       { href: "/dashboard/diary", label: "Diário", icon: BookOpen },
       { href: "/dashboard/documents", label: "Documentos", icon: FileText },
+    ],
+  },
+  {
+    label: "Walker",
+    icon: Footprints,
+    defaultOpen: false,
+    items: [
+      { href: "/dashboard/walker/walkers", label: "Walkers", icon: Users },
+      { href: "/dashboard/walker/passeios", label: "Passeios", icon: Route },
+      { href: "/dashboard/walker/servicos", label: "Serviços", icon: Wrench },
+      { href: "/dashboard/walker/avaliacoes", label: "Avaliações", icon: Star },
     ],
   },
   {
