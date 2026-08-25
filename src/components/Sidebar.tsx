@@ -93,6 +93,7 @@ const navGroups: NavGroup[] = [
     icon: Footprints,
     defaultOpen: false,
     items: [
+      { href: "/dashboard/walker/overview", label: "Visão Geral", icon: LayoutDashboard },
       { href: "/dashboard/walker/walkers", label: "Walkers", icon: Users },
       { href: "/dashboard/walker/passeios", label: "Passeios", icon: Route },
       { href: "/dashboard/walker/servicos", label: "Serviços", icon: Wrench },

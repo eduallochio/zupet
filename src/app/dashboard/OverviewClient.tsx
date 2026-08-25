@@ -25,7 +25,7 @@ import {
   PieChart,
   ResponsiveContainer,
 } from "recharts";
-import { Users, PawPrint, TrendingUp, Activity, ArrowUpRight, ArrowDownRight, Calendar, Zap, Footprints, MapPin, Star } from "lucide-react";
+import { Users, PawPrint, TrendingUp, Activity, ArrowUpRight, ArrowDownRight, Calendar } from "lucide-react";
 
 type Stats = {
   totalUsers: number;
@@ -37,14 +37,6 @@ type Stats = {
   speciesData: { name: string; value: number }[];
   chartData: { date: string; Usuários: number; Pets: number }[];
   recentUsers: { name: string; value: string }[];
-  walkerStats: {
-    totalWalkers: number;
-    activeWalkers: number;
-    proWalkers: number;
-    totalSessions: number;
-    totalKm: number;
-    avgRating: number;
-  };
 };
 
 const areaChartConfig: ChartConfig = {
@@ -226,22 +218,6 @@ export default function OverviewClient({ stats }: { stats: Stats }) {
           )}
         </CardContent>
       </Card>
-      {/* Walker section */}
-      <div className="pt-2">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-2">Visão Geral — Walker</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <KpiCard title="Total de Walkers" value={stats.walkerStats.totalWalkers.toLocaleString("pt-BR")} icon={Users} sub="registrados" />
-          <KpiCard title="Walkers Ativos" value={stats.walkerStats.activeWalkers.toLocaleString("pt-BR")} icon={Activity} sub="com conta ativa" />
-          <KpiCard title="Plano Pro" value={stats.walkerStats.proWalkers.toLocaleString("pt-BR")} icon={Zap} sub="assinantes pro" />
-          <KpiCard title="Passeios Realizados" value={stats.walkerStats.totalSessions.toLocaleString("pt-BR")} icon={Footprints} sub="sessões finalizadas" />
-          <KpiCard title="Km Percorridos" value={stats.walkerStats.totalKm.toLocaleString("pt-BR")} icon={MapPin} sub="quilômetros no total" />
-          <KpiCard title="Avaliação Média" value={stats.walkerStats.avgRating > 0 ? stats.walkerStats.avgRating.toFixed(1) : "—"} icon={Star} sub="média das avaliações" />
-        </div>
-      </div>
     </div>
   );
 }
