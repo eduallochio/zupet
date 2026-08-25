@@ -5,7 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Users, Calendar, PawPrint } from "lucide-react";
+import { useState } from "react";
+import { Users, Calendar, PawPrint, ChevronLeft, ChevronRight } from "lucide-react";
+
+const PAGE_SIZE = 20;
 
 type User = {
   id: string;
@@ -20,6 +23,7 @@ type User = {
 };
 
 export default function UsersClient({ users }: { users: User[] }) {
+  const [page, setPage] = useState(1);
   const now = new Date();
   const days30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const newUsers = users.filter((u) => new Date(u.createdAt) >= days30).length;
@@ -27,6 +31,9 @@ export default function UsersClient({ users }: { users: User[] }) {
   const androidCount = users.filter((u) => u.platform === "android").length;
   const iosCount = users.filter((u) => u.platform === "ios").length;
   const unknownCount = users.filter((u) => !u.platform).length;
+
+  const totalPages = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
+  const paginatedUsers = users.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -106,7 +113,7 @@ export default function UsersClient({ users }: { users: User[] }) {
           {users.length === 0 ? (
             <p className="text-center text-muted-foreground py-12 text-sm">Nenhum usuário encontrado</p>
           ) : (
-            users.map((user) => {
+            paginatedUsers.map((user) => {
               const isNew = new Date(user.createdAt) >= days30;
               return (
                 <div key={user.id} className="px-4 py-4 flex items-start gap-3">
@@ -182,7 +189,7 @@ export default function UsersClient({ users }: { users: User[] }) {
                   </TableCell>
                 </TableRow>
               ) : (
-                users.map((user) => {
+                paginatedUsers.map((user) => {
                   const isNew = new Date(user.createdAt) >= days30;
                   return (
                     <TableRow key={user.id}>
@@ -258,6 +265,55 @@ export default function UsersClient({ users }: { users: User[] }) {
             </TableBody>
           </Table>
         </CardContent>
+
+        {/* Paginação */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-3 border-t border-border">
+            <p className="text-xs text-muted-foreground">
+              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, users.length)} de {users.length.toLocaleString("pt-BR")} usuários
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="h-8 w-8 flex items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                  if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((p, i) =>
+                  p === "..." ? (
+                    <span key={`ellipsis-${i}`} className="h-8 w-8 flex items-center justify-center text-xs text-muted-foreground">…</span>
+                  ) : (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p as number)}
+                      className={`h-8 w-8 flex items-center justify-center rounded-md text-xs font-medium transition-colors ${
+                        page === p
+                          ? "bg-primary text-primary-foreground"
+                          : "border border-border text-muted-foreground hover:text-foreground hover:bg-secondary"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  )
+                )}
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="h-8 w-8 flex items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );
