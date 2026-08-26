@@ -177,7 +177,7 @@ export default function WalkerAnalyticsClient({ data }: Props) {
                 <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
-                  formatter={(v: number) => [`R$ ${v.toLocaleString("pt-BR")}`, "Receita"]}
+                  formatter={(v) => [`R$ ${Number(v ?? 0).toLocaleString("pt-BR")}`, "Receita"]}
                 />
                 <Line type="monotone" dataKey="Receita (R$)" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
