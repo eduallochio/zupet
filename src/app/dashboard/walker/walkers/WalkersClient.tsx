@@ -6,6 +6,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { Users, Calendar, Star, Zap, ChevronLeft, ChevronRight, Crown, X } from "lucide-react";
 
 const PAGE_SIZE = 20;
@@ -43,7 +44,7 @@ function PlanModal({
     });
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
       <div className="bg-background border border-border rounded-xl shadow-xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 mb-4">
@@ -99,7 +100,8 @@ function PlanModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
