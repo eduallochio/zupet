@@ -1,14 +1,15 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import UsersClient from "./UsersClient";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 async function getUsers() {
-  const [{ data: profiles }, { data: petRows }, { data: { users: authUsers } }, { data: walkerProfiles }] = await Promise.all([
+  const [{ data: profiles }, { data: petRows }, { data: { users: authUsers } }, { data: walkerProfiles }, { data: identities }] = await Promise.all([
     supabaseAdmin.from("user_profiles").select("user_id, name, city, state, platform, app_version, updated_at"),
     supabaseAdmin.from("pets").select("user_id"),
     supabaseAdmin.auth.admin.listUsers(),
     supabaseAdmin.from("walker_profiles").select("user_id"),
+    supabaseAdmin.from("identities").select("user_id, provider"),
   ]);
 
   const walkerUserIds = new Set((walkerProfiles ?? []).map((w) => w.user_id));
@@ -18,6 +19,12 @@ async function getUsers() {
 
   const countMap: Record<string, number> = {};
   for (const p of petRows ?? []) countMap[p.user_id] = (countMap[p.user_id] ?? 0) + 1;
+
+  const providersMap: Record<string, string[]> = {};
+  for (const i of identities ?? []) {
+    if (!providersMap[i.user_id]) providersMap[i.user_id] = [];
+    providersMap[i.user_id].push(i.provider);
+  }
 
   // Base: auth.users — garante que todos os usuários aparecem, mesmo sem perfil criado
   return authUsers
@@ -36,6 +43,7 @@ async function getUsers() {
         platform: (profile?.platform as "android" | "ios" | null) ?? null,
         appVersion: profile?.app_version ?? null,
         isWalker: walkerUserIds.has(u.id),
+        providers: providersMap[u.id] ?? [],
       };
     });
 }
