@@ -41,6 +41,7 @@ import {
   AlertTriangle,
   CreditCard,
   Ticket,
+  Settings,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -147,6 +148,7 @@ const walkerGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { href: "/dashboard/walker/landing", label: "Landing Page", icon: Globe },
+      { href: "/dashboard/walker/configuracoes", label: "Configurações", icon: Settings },
     ],
   },
 ];
