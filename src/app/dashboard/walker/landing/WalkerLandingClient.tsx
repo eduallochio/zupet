@@ -1,9 +1,17 @@
 "use client";
 
-import { Globe, Code2, ExternalLink } from "lucide-react";
+import { Globe, Code2, ExternalLink, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { WalkerLead } from "./page";
 
-export function WalkerLandingClient() {
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit", month: "short", year: "2-digit",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
+export function WalkerLandingClient({ leads }: { leads: WalkerLead[] }) {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -24,6 +32,69 @@ export function WalkerLandingClient() {
           </p>
         </div>
       </div>
+
+      {/* Leads captados */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
+            Leads captados
+            <span className="ml-auto text-sm font-normal text-muted-foreground">
+              {leads.length} {leads.length === 1 ? "contato" : "contatos"}
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {leads.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">
+              Nenhum lead ainda. Os cadastros feitos no formulário do site aparecerão aqui.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-xs text-muted-foreground uppercase tracking-wide">
+                    <th className="text-left py-2 pr-4 font-medium">Nome</th>
+                    <th className="text-left py-2 pr-4 font-medium">WhatsApp</th>
+                    <th className="text-left py-2 pr-4 font-medium">Instagram</th>
+                    <th className="text-left py-2 font-medium">Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leads.map((lead) => (
+                    <tr key={lead.id} className="border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors">
+                      <td className="py-2.5 pr-4 font-medium">{lead.name}</td>
+                      <td className="py-2.5 pr-4">
+                        <a
+                          href={`https://wa.me/55${lead.phone.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {lead.phone}
+                        </a>
+                      </td>
+                      <td className="py-2.5 pr-4 text-muted-foreground">
+                        {lead.instagram ? (
+                          <a
+                            href={`https://instagram.com/${lead.instagram.replace(/^@/, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            @{lead.instagram.replace(/^@/, "")}
+                          </a>
+                        ) : "—"}
+                      </td>
+                      <td className="py-2.5 text-muted-foreground text-xs">{formatDate(lead.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Placeholder central */}
       <Card className="border-dashed border-2 border-border">
