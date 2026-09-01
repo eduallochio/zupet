@@ -1,8 +1,8 @@
 "use client";
 
-import { Globe, Code2, ExternalLink, Users } from "lucide-react";
+import { Globe, ExternalLink, Users, Eye, Smartphone, Monitor, ShoppingBag } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { WalkerLead } from "./page";
+import type { WalkerLead, TrackingStats } from "./page";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR", {
@@ -11,7 +11,26 @@ function formatDate(iso: string) {
   });
 }
 
-export function WalkerLandingClient({ leads }: { leads: WalkerLead[] }) {
+function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string | number; sub?: string }) {
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          {icon}
+          <span className="text-xs text-muted-foreground">{label}</span>
+        </div>
+        <p className="text-2xl font-bold tabular-nums">{value}</p>
+        {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
+export function WalkerLandingClient({ leads, stats }: { leads: WalkerLead[]; stats: TrackingStats }) {
+  const mobilePercent = stats.totalViews > 0
+    ? Math.round((stats.mobileViews / stats.totalViews) * 100)
+    : 0;
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -31,6 +50,55 @@ export function WalkerLandingClient({ leads }: { leads: WalkerLead[] }) {
             </a>
           </p>
         </div>
+        <a
+          href="https://walker.zupet.io"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity w-fit"
+        >
+          <Globe className="w-4 h-4" />
+          Abrir walker.zupet.io
+        </a>
+      </div>
+
+      {/* Stats de visitas */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          icon={<Eye className="w-4 h-4 text-primary" />}
+          label="Visitas totais"
+          value={stats.totalViews}
+        />
+        <StatCard
+          icon={<Eye className="w-4 h-4 text-blue-500" />}
+          label="Últimos 30 dias"
+          value={stats.viewsLast30}
+        />
+        <StatCard
+          icon={<Smartphone className="w-4 h-4 text-orange-500" />}
+          label="Mobile"
+          value={stats.mobileViews}
+          sub={`${mobilePercent}% do total`}
+        />
+        <StatCard
+          icon={<Monitor className="w-4 h-4 text-purple-500" />}
+          label="Desktop"
+          value={stats.desktopViews}
+          sub={`${100 - mobilePercent}% do total`}
+        />
+      </div>
+
+      {/* Cliques nas lojas */}
+      <div className="grid grid-cols-2 gap-4">
+        <StatCard
+          icon={<ShoppingBag className="w-4 h-4 text-green-500" />}
+          label="Cliques — Google Play"
+          value={stats.androidClicks}
+        />
+        <StatCard
+          icon={<ShoppingBag className="w-4 h-4 text-gray-500" />}
+          label="Cliques — App Store"
+          value={stats.iosClicks}
+        />
       </div>
 
       {/* Leads captados */}
@@ -95,95 +163,6 @@ export function WalkerLandingClient({ leads }: { leads: WalkerLead[] }) {
           )}
         </CardContent>
       </Card>
-
-      {/* Placeholder central */}
-      <Card className="border-dashed border-2 border-border">
-        <CardContent className="flex flex-col items-center justify-center py-16 gap-6 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Globe className="w-8 h-8 text-primary" />
-          </div>
-
-          <div className="max-w-md space-y-2">
-            <h2 className="text-lg font-semibold">Nenhum dado disponível ainda</h2>
-            <p className="text-sm text-muted-foreground">
-              As métricas de visitas e cliques estarão disponíveis aqui assim que o script de
-              tracking for configurado no site do Walker.
-            </p>
-          </div>
-
-          {/* Instrução de configuração */}
-          <div className="w-full max-w-lg">
-            <Card className="bg-muted/50 border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <Code2 className="w-4 h-4 text-muted-foreground" />
-                  Como configurar o tracking
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-left">
-                <p className="text-xs text-muted-foreground">
-                  Adicione o script de tracking no projeto{" "}
-                  <code className="px-1.5 py-0.5 rounded bg-background font-mono text-foreground">
-                    zupet-walker-web
-                  </code>{" "}
-                  para começar a receber dados aqui:
-                </p>
-                <pre className="text-xs bg-background rounded-lg p-3 overflow-x-auto border border-border text-foreground font-mono whitespace-pre-wrap">
-{`// Em cada page view — enviar para a API do dashboard
-await fetch('/api/tracking/page-view', {
-  method: 'POST',
-  body: JSON.stringify({
-    page: window.location.pathname,
-    source: 'walker.zupet.io',
-    device: /Mobi/.test(navigator.userAgent)
-      ? 'mobile' : 'desktop',
-    country: 'BR', // usar Vercel geo headers
-  }),
-})`}
-                </pre>
-                <p className="text-xs text-muted-foreground">
-                  Os dados passarão a aparecer nesta página assim que o primeiro evento for registrado.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <a
-            href="https://walker.zupet.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <Globe className="w-4 h-4" />
-            Abrir walker.zupet.io
-          </a>
-        </CardContent>
-      </Card>
-
-      {/* Prévia dos cards que aparecerão quando houver dados */}
-      <div>
-        <p className="text-xs text-muted-foreground mb-3 uppercase tracking-wide font-medium">
-          Quando os dados chegarem, você verá:
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            "Visitas no período",
-            "Cadastros iniciados",
-            "CTR do período",
-            "Mobile vs Desktop",
-          ].map((label) => (
-            <Card key={label} className="opacity-40">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs text-muted-foreground">{label}</span>
-                </div>
-                <div className="h-7 w-16 rounded bg-muted animate-none" />
-                <div className="h-3 w-24 rounded bg-muted mt-2" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
