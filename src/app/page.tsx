@@ -907,9 +907,9 @@ export default async function LandingPage() {
         <section style={{ background: "oklch(0.10 0.02 174)", borderTop: "1px solid oklch(0.18 0.04 174)" }}>
           <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+              <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0"
                 style={{ background: "oklch(0.22 0.08 174)" }}>
-                <span style={{ fontSize: "1.5rem" }}>🦮</span>
+                <Image src="/walker-icon.png" alt="Zupet Walker" width={48} height={48} className="w-full h-full object-cover" />
               </div>
               <div>
                 <p className="font-bold text-sm" style={{ color: "oklch(0.92 0 0)" }}>
