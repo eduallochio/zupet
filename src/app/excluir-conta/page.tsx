@@ -4,11 +4,54 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+type AppType = "tutor" | "walker";
+
+const APP_CONFIG: Record<AppType, {
+  label: string;
+  color: string;
+  ring: string;
+  icon: string;
+  dataItems: string[];
+  appPath: string;
+}> = {
+  tutor: {
+    label: "Zupet Tutor",
+    color: "#e87c3a",
+    ring: "focus:ring-[#e87c3a]/30 focus:border-[#e87c3a]",
+    icon: "🐾",
+    dataItems: [
+      "Perfil e informações da conta",
+      "Dados de todos os pets cadastrados",
+      "Diário, alimentação e registros de saúde",
+      "Documentos e fotos armazenados",
+      "Histórico de notificações e lembretes",
+    ],
+    appPath: "Perfil → Configurações → Excluir conta",
+  },
+  walker: {
+    label: "Zupet Walker",
+    color: "#00C6A7",
+    ring: "focus:ring-[#00C6A7]/30 focus:border-[#00C6A7]",
+    icon: "🦮",
+    dataItems: [
+      "Perfil e informações do walker",
+      "Agenda e histórico de passeios",
+      "Avaliações e conquistas",
+      "Serviços cadastrados",
+      "Histórico de pagamentos",
+    ],
+    appPath: "Perfil → Configurações → Excluir conta",
+  },
+};
+
 export default function ExcluirContaPage() {
+  const [app, setApp] = useState<AppType>("tutor");
   const [email, setEmail] = useState("");
   const [reason, setReason] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "duplicate">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  const cfg = APP_CONFIG[app];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,7 +62,7 @@ export default function ExcluirContaPage() {
       const res = await fetch("/api/deletion-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, reason }),
+        body: JSON.stringify({ email, reason, app }),
       });
 
       const data = await res.json();
@@ -64,7 +107,7 @@ export default function ExcluirContaPage() {
               </div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Solicitação recebida</h2>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Recebemos sua solicitação de exclusão de conta. Processaremos em até <strong>7 dias úteis</strong> e enviaremos uma confirmação para o seu email.
+                Recebemos sua solicitação de exclusão da conta <strong>{cfg.label}</strong>. Processaremos em até <strong>7 dias úteis</strong> e enviaremos uma confirmação para o seu email.
               </p>
               <p className="text-gray-400 text-xs mt-4">
                 Caso tenha dúvidas, entre em contato: <a href="mailto:contato@zupet.io" className="text-[#e87c3a] hover:underline">contato@zupet.io</a>
@@ -90,19 +133,46 @@ export default function ExcluirContaPage() {
               <div className="mb-6">
                 <h1 className="text-2xl font-semibold text-gray-900 mb-2">Excluir minha conta</h1>
                 <p className="text-gray-500 text-sm leading-relaxed">
-                  Ao solicitar a exclusão, todos os seus dados serão permanentemente removidos — incluindo perfil, pets, diário, documentos e fotos. Esta ação não pode ser desfeita.
+                  Ao solicitar a exclusão, todos os seus dados serão permanentemente removidos. Esta ação não pode ser desfeita.
                 </p>
+              </div>
+
+              {/* Seletor de app */}
+              <div className="mb-6">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Qual app você quer excluir?</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {(["tutor", "walker"] as AppType[]).map((a) => {
+                    const c = APP_CONFIG[a];
+                    const active = app === a;
+                    return (
+                      <button
+                        key={a}
+                        type="button"
+                        onClick={() => setApp(a)}
+                        className="flex items-center gap-3 p-3 rounded-xl border-2 transition text-left"
+                        style={{
+                          borderColor: active ? c.color : "#e5e7eb",
+                          backgroundColor: active ? c.color + "10" : "transparent",
+                        }}
+                      >
+                        <span className="text-2xl">{c.icon}</span>
+                        <div>
+                          <p className="text-sm font-semibold" style={{ color: active ? c.color : "#374151" }}>{c.label}</p>
+                          <p className="text-xs text-gray-400">{a === "tutor" ? "App do tutor" : "App do walker"}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* O que será excluído */}
               <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6">
-                <p className="text-xs font-medium text-red-700 mb-2">Dados que serão excluídos:</p>
+                <p className="text-xs font-medium text-red-700 mb-2">Dados que serão excluídos ({cfg.label}):</p>
                 <ul className="text-xs text-red-600 space-y-1">
-                  <li>• Perfil e informações da conta</li>
-                  <li>• Dados de todos os pets cadastrados</li>
-                  <li>• Diário, alimentação e registros de saúde</li>
-                  <li>• Documentos e fotos armazenados</li>
-                  <li>• Histórico de notificações e lembretes</li>
+                  {cfg.dataItems.map((item) => (
+                    <li key={item}>• {item}</li>
+                  ))}
                 </ul>
               </div>
 
@@ -118,7 +188,7 @@ export default function ExcluirContaPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="seu@email.com"
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#e87c3a]/30 focus:border-[#e87c3a] transition"
+                    className={`w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 transition ${cfg.ring}`}
                   />
                 </div>
 
@@ -132,7 +202,7 @@ export default function ExcluirContaPage() {
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Conte-nos o motivo para melhorarmos o app..."
                     rows={3}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#e87c3a]/30 focus:border-[#e87c3a] transition resize-none"
+                    className={`w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 transition resize-none ${cfg.ring}`}
                   />
                 </div>
 
@@ -143,15 +213,16 @@ export default function ExcluirContaPage() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-xl text-sm transition"
+                  className="w-full disabled:opacity-60 text-white font-medium py-2.5 rounded-xl text-sm transition"
+                  style={{ backgroundColor: "#dc2626" }}
                 >
                   {status === "loading" ? "Enviando..." : "Solicitar exclusão da conta"}
                 </button>
               </form>
 
               <p className="text-xs text-gray-400 text-center mt-4">
-                Prefere excluir pelo app? Vá em <strong>Perfil → Configurações → Excluir conta</strong>.{" "}
-                <Link href="/privacidade" className="text-[#e87c3a] hover:underline">Política de privacidade</Link>
+                Prefere excluir pelo app? Vá em <strong>{cfg.appPath}</strong>.{" "}
+                <Link href="/privacidade" className="hover:underline" style={{ color: cfg.color }}>Política de privacidade</Link>
               </p>
             </div>
           )}
