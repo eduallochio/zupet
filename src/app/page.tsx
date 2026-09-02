@@ -903,6 +903,35 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        {/* ── Banner Walker ────────────────────────────────────────────────── */}
+        <section style={{ background: "oklch(0.10 0.02 174)", borderTop: "1px solid oklch(0.18 0.04 174)" }}>
+          <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "oklch(0.22 0.08 174)" }}>
+                <span style={{ fontSize: "1.5rem" }}>🦮</span>
+              </div>
+              <div>
+                <p className="font-bold text-sm" style={{ color: "oklch(0.92 0 0)" }}>
+                  Você é profissional de pets?
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: "oklch(0.65 0.05 174)" }}>
+                  Passeador, banhista, hospedeiro, adestredor — o Zupet Walker é o app para gerenciar seus atendimentos.
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://walker.zupet.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105"
+              style={{ background: "oklch(0.62 0.18 174)", color: "#fff" }}
+            >
+              Conheça o Zupet Walker →
+            </a>
+          </div>
+        </section>
+
         {/* ── Footer ──────────────────────────────────────────────────────── */}
         <footer style={{ background: "oklch(0.09 0 0)", borderTop: "1px solid oklch(0.15 0 0)" }}>
           <div className="max-w-6xl mx-auto px-6 py-12">
