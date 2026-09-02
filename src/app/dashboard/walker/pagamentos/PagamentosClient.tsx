@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Banknote, TrendingUp, Clock, XCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Banknote, TrendingUp, Clock, XCircle, Pencil, Check, X } from "lucide-react";
 
 const PAGE_SIZE = 20;
 
@@ -61,12 +62,41 @@ function StatusBadge({ status }: { status: Payment["status"] }) {
   return <Badge className="text-xs bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/10">Cancelado</Badge>;
 }
 
+type EditState = { id: string; amount: string; notes: string };
+
 export default function PagamentosClient({ payments }: { payments: Payment[] }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const now = new Date();
   const [viewYear, setViewYear]   = useState(now.getFullYear());
   const [viewMonth, setViewMonth] = useState(now.getMonth());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
   const [page, setPage] = useState(1);
+  const [editing, setEditing] = useState<EditState | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  function startEdit(p: Payment) {
+    setEditing({ id: p.id, amount: p.amount.toFixed(2).replace(".", ","), notes: p.notes ?? "" });
+    setEditError(null);
+  }
+
+  function cancelEdit() { setEditing(null); setEditError(null); }
+
+  async function saveEdit() {
+    if (!editing) return;
+    const raw = editing.amount.replace(",", ".");
+    const amount = parseFloat(raw);
+    if (isNaN(amount) || amount < 0) { setEditError("Valor inválido"); return; }
+    const res = await fetch("/api/walker/pagamentos/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editing.id, amount, notes: editing.notes || null }),
+    });
+    if (!res.ok) { const d = await res.json(); setEditError(d.error ?? "Erro ao salvar"); return; }
+    setEditing(null);
+    setEditError(null);
+    startTransition(() => router.refresh());
+  }
 
   const isCurrentMonth = viewYear === now.getFullYear() && viewMonth === now.getMonth();
 
@@ -183,6 +213,35 @@ export default function PagamentosClient({ payments }: { payments: Payment[] }) 
                 {p.serviceType && <span>{SERVICE_TYPE_LABELS[p.serviceType] ?? p.serviceType}</span>}
                 <span>{fmtDate(p.createdAt)}</span>
               </div>
+              {p.status === "pending" && editing?.id === p.id ? (
+                <div className="mt-2 flex flex-col gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground">R$</span>
+                    <input type="text" value={editing.amount}
+                      onChange={(e) => setEditing((v) => v ? { ...v, amount: e.target.value } : v)}
+                      className="h-7 w-24 rounded-md border border-border bg-muted px-2 text-xs text-foreground tabular-nums"
+                      placeholder="0,00" />
+                    <button onClick={saveEdit} disabled={isPending}
+                      className="h-7 px-2 rounded-md bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={cancelEdit}
+                      className="h-7 px-2 rounded-md bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <input type="text" value={editing.notes}
+                    onChange={(e) => setEditing((v) => v ? { ...v, notes: e.target.value } : v)}
+                    className="h-7 w-full rounded-md border border-border bg-muted px-2 text-xs text-foreground"
+                    placeholder="Observação / motivo desconto (opcional)" />
+                  {editError && <p className="text-xs text-rose-400">{editError}</p>}
+                </div>
+              ) : p.status === "pending" ? (
+                <button onClick={() => startEdit(p)}
+                  className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+                  <Pencil className="w-3 h-3" /> Editar valor
+                </button>
+              ) : null}
             </div>
           ))}
         </div>
@@ -223,7 +282,46 @@ export default function PagamentosClient({ payments }: { payments: Payment[] }) 
                   </TableCell>
                   <TableCell className="text-sm font-semibold tabular-nums text-foreground">{fmtBRL(p.amount)}</TableCell>
                   <TableCell><StatusBadge status={p.status} /></TableCell>
-                  <TableCell className="pr-6 text-sm text-muted-foreground">—</TableCell>
+                  <TableCell className="pr-6">
+                    {p.status === "pending" && editing?.id === p.id ? (
+                      <div className="flex flex-col gap-1.5 min-w-[200px]">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground">R$</span>
+                          <input
+                            type="text"
+                            value={editing.amount}
+                            onChange={(e) => setEditing((v) => v ? { ...v, amount: e.target.value } : v)}
+                            className="h-7 w-24 rounded-md border border-border bg-muted px-2 text-xs text-foreground tabular-nums"
+                            placeholder="0,00"
+                          />
+                          <button onClick={saveEdit} disabled={isPending}
+                            className="h-7 px-2 rounded-md bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors">
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={cancelEdit}
+                            className="h-7 px-2 rounded-md bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          value={editing.notes}
+                          onChange={(e) => setEditing((v) => v ? { ...v, notes: e.target.value } : v)}
+                          className="h-7 w-full rounded-md border border-border bg-muted px-2 text-xs text-foreground"
+                          placeholder="Observação / motivo desconto (opcional)"
+                        />
+                        {editError && <p className="text-xs text-rose-400">{editError}</p>}
+                      </div>
+                    ) : p.status === "pending" ? (
+                      <button onClick={() => startEdit(p)}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                        <Pencil className="w-3.5 h-3.5" />
+                        Editar valor
+                      </button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
