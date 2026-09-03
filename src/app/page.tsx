@@ -983,13 +983,13 @@ export default async function LandingPage() {
               <p className="text-center text-xs" style={{ color: "oklch(0.45 0 0)" }}>
                 desenvolvido por{" "}
                 <a
-                  href="https://omegasistem.com.br"
+                  href="https://www.instagram.com/eduallochio/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-white"
                   style={{ color: "oklch(0.58 0 0)" }}
                 >
-                  omegasistem.com.br
+                  Eduardo Allochio
                 </a>
               </p>
             </div>
