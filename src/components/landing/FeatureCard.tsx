@@ -4,6 +4,7 @@ import { TiltCard } from "./TiltCard";
 import {
   Stethoscope, PlaneTakeoff, Bell, Camera, Wallet,
   UtensilsCrossed, Trophy, WifiOff, PawPrint, HeartPulse,
+  Bath, Home, Sun, Target, Syringe,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -18,6 +19,11 @@ const ICONS: Record<string, LucideIcon> = {
   WifiOff,
   PawPrint,
   HeartPulse,
+  Bath,
+  Home,
+  Sun,
+  Target,
+  Syringe,
 };
 
 export function FeatureCard({

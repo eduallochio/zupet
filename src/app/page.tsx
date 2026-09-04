@@ -903,32 +903,58 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* ── Banner Walker ────────────────────────────────────────────────── */}
-        <section style={{ background: "oklch(0.10 0.02 174)", borderTop: "1px solid oklch(0.18 0.04 174)" }}>
-          <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl overflow-hidden flex-shrink-0"
-                style={{ background: "oklch(0.22 0.08 174)" }}>
-                <Image src="/walker-icon.png" alt="Zupet Walker" width={48} height={48} className="w-full h-full object-cover" />
-              </div>
-              <div>
-                <p className="font-bold text-sm" style={{ color: "oklch(0.92 0 0)" }}>
-                  Você é profissional de pets?
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: "oklch(0.65 0.05 174)" }}>
-                  Passeador, banhista, hospedeiro, adestredor — o Zupet Walker é o app para gerenciar seus atendimentos.
-                </p>
-              </div>
-            </div>
-            <a
-              href="https://walker.zupet.io"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105"
-              style={{ background: "oklch(0.62 0.18 174)", color: "#fff" }}
-            >
-              Conheça o Zupet Walker →
-            </a>
+        {/* ── Serviços Walker ──────────────────────────────────────────────── */}
+        <section className="py-28 px-6 relative overflow-hidden" style={{ background: "oklch(0.115 0 0)" }}>
+          <div aria-hidden className="absolute top-0 left-0 right-0 h-px"
+            style={{ background: "linear-gradient(90deg, transparent, oklch(0.62 0.18 174 / 0.3), transparent)" }} />
+          <div aria-hidden className="absolute inset-0 pointer-events-none">
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px]"
+              style={{ background: "radial-gradient(ellipse, oklch(0.62 0.18 174 / 0.05) 0%, transparent 65%)", filter: "blur(60px)" }} />
+          </div>
+
+          <div className="max-w-6xl mx-auto relative">
+            <FadeUp className="text-center mb-14">
+              <p className="text-xs font-mono tracking-widest uppercase mb-4" style={{ color: "oklch(0.62 0.18 174)" }}>
+                Para todos os profissionais de pets
+              </p>
+              <h2 className="font-heading text-4xl md:text-5xl font-bold leading-[1.05]" style={{ color: "oklch(0.96 0 0)" }}>
+                Gerencie qualquer tipo<br />
+                <span className="animated-gradient-text">de atendimento.</span>
+              </h2>
+              <p className="mt-5 text-sm leading-relaxed max-w-md mx-auto" style={{ color: "oklch(0.68 0 0)" }}>
+                O Zupet Walker foi feito para quem cuida de pets profissionalmente — do passeio à visita veterinária.
+              </p>
+            </FadeUp>
+
+            <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" stagger={0.08}>
+              {[
+                { icon: "PawPrint",    title: "Passeio",          description: "Caminhadas seguras e monitoradas para cães de todos os portes, com rastreamento e relatório ao tutor." },
+                { icon: "Bath",        title: "Banho e Tosa",     description: "Higiene e bem-estar com produtos de qualidade. Histórico completo de cada atendimento estético." },
+                { icon: "Home",        title: "Hospedagem",       description: "Seu pet acolhido em ambiente seguro enquanto você viaja. Atualizações e fotos para o tutor." },
+                { icon: "Sun",         title: "Day Care",         description: "Companhia e atividades durante o dia para pets que ficam sozinhos. Rotina saudável e divertida." },
+                { icon: "Target",      title: "Adestramento",     description: "Treinamento comportamental com métodos positivos e eficazes. Evolução registrada a cada sessão." },
+                { icon: "Syringe",     title: "Visita Veterinária", description: "Acompanhamento domiciliar com profissionais veterinários. Histórico médico integrado ao perfil do pet." },
+              ].map(({ icon, title, description }) => (
+                <StaggerItem key={title}>
+                  <FeatureCard icon={icon} title={title} description={description} />
+                </StaggerItem>
+              ))}
+            </StaggerChildren>
+
+            <FadeUp delay={0.3} className="mt-12 text-center">
+              <a
+                href="https://walker.zupet.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-105 hover:opacity-90"
+                style={{ background: "oklch(0.62 0.18 174)", color: "#fff", boxShadow: "0 4px 24px oklch(0.62 0.18 174 / 0.30)" }}
+              >
+                Conheça o Zupet Walker →
+              </a>
+              <p className="mt-3 text-xs" style={{ color: "oklch(0.50 0 0)" }}>
+                App gratuito para profissionais de pets
+              </p>
+            </FadeUp>
           </div>
         </section>
 
