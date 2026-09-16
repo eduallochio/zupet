@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import ProgressBar from "@/components/ProgressBar";
+import SmoothScroll from "@/components/SmoothScroll";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -64,6 +65,7 @@ export default function RootLayout({
         <meta name="apple-itunes-app" content="app-id=6793655564" />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <SmoothScroll />
         <ProgressBar />
         {children}
       </body>
