@@ -3,6 +3,7 @@ import Image from "next/image";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { FadeUp, FadeIn, ScaleIn, StaggerChildren, StaggerItem } from "@/components/landing/AnimatedSection"; // StaggerChildren/StaggerItem usados em Features e FAQ
 import { SplitText } from "@/components/landing/SplitText";
+import { ParallaxSection } from "@/components/landing/ParallaxSection";
 import CountUp from "@/components/landing/CountUp";
 import { ScrollStackWrapper as ScrollStack, ScrollStackItemWrapper as ScrollStackItem } from "@/components/landing/ScrollStackWrapper";
 import { TrackPageView, TrackableStoreLink } from "@/components/landing/TrackingProvider";
@@ -323,6 +324,7 @@ export default async function LandingPage() {
 
               {/* Lado direito — mockup do app */}
               <ScaleIn delay={0.2} className="flex justify-center lg:justify-end">
+                <ParallaxSection speed={0.12}>
                 <div className="relative">
                   {/* Glow atrás do celular */}
                   <div aria-hidden className="absolute inset-0 rounded-[3rem]"
@@ -387,6 +389,7 @@ export default async function LandingPage() {
                     </div>
                   </FadeIn>
                 </div>
+                </ParallaxSection>
               </ScaleIn>
             </div>
 
