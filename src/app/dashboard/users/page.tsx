@@ -7,7 +7,7 @@ async function getUsers() {
   const [{ data: profiles }, { data: petRows }, { data: { users: authUsers } }, { data: walkerProfiles }, { data: identities }] = await Promise.all([
     supabaseAdmin.from("user_profiles").select("user_id, name, city, state, platform, app_version, updated_at"),
     supabaseAdmin.from("pets").select("user_id"),
-    supabaseAdmin.auth.admin.listUsers(),
+    supabaseAdmin.auth.admin.listUsers({ perPage: 1000 }),
     supabaseAdmin.from("walker_profiles").select("user_id"),
     supabaseAdmin.from("identities").select("user_id, provider"),
   ]);

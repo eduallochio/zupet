@@ -30,7 +30,7 @@ async function getAnalytics() {
     supabaseAdmin.from("pet_photos").select("id, pet_id, created_at"),
     supabaseAdmin.from("pet_deletions").select("id, pet_name, pet_species, reason, is_memorial, deleted_at").order("deleted_at", { ascending: false }),
     supabaseAdmin.from("user_achievements").select("user_id, achievement_id, unlocked_at"),
-    supabaseAdmin.auth.admin.listUsers(),
+    supabaseAdmin.auth.admin.listUsers({ perPage: 1000 }),
   ]);
 
   const now = new Date();

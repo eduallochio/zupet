@@ -10,7 +10,7 @@ async function getData() {
     .order("created_at", { ascending: false })
     .limit(500);
 
-  const { data: { users: authUsers } } = await supabaseAdmin.auth.admin.listUsers();
+  const { data: { users: authUsers } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
   const emailMap: Record<string, string> = {};
   for (const u of authUsers) emailMap[u.id] = u.email ?? "—";
 

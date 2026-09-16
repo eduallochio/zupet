@@ -14,7 +14,7 @@ async function getData() {
       .select("id, walker_id, owner_id, started_at, ended_at, duration_minutes, distance_meters, notes, pet_ids, created_at")
       .order("created_at", { ascending: false }),
     supabaseAdmin.from("walker_profiles").select("id, user_id, name"),
-    supabaseAdmin.auth.admin.listUsers(),
+    supabaseAdmin.auth.admin.listUsers({ perPage: 1000 }),
   ]);
 
   const walkerMap: Record<string, string> = {};

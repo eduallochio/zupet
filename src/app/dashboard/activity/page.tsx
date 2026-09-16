@@ -8,7 +8,7 @@ import { Activity, UserPlus, PawPrint, FileText, Utensils, Camera } from "lucide
 async function getActivity() {
   const [authResult, newPets, photos] =
     await Promise.all([
-      supabaseAdmin.auth.admin.listUsers(),
+      supabaseAdmin.auth.admin.listUsers({ perPage: 1000 }),
       supabaseAdmin
         .from("pets")
         .select("id, name, species, user_id, created_at")

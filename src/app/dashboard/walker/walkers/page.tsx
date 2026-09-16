@@ -14,7 +14,7 @@ async function getWalkers() {
       .from("walker_profiles")
       .select("id, user_id, name, city, state, plan, rating, active, created_at"),
     supabaseAdmin.from("walker_services").select("walker_id, active"),
-    supabaseAdmin.auth.admin.listUsers(),
+    supabaseAdmin.auth.admin.listUsers({ perPage: 1000 }),
     supabaseAdmin.from("user_profiles").select("user_id"),
   ]);
 
