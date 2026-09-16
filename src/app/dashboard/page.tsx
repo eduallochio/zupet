@@ -4,11 +4,21 @@ import OverviewClient from "./OverviewClient";
 export const revalidate = 60; // ISR: regenera a página a cada 60 segundos
 
 async function getStats() {
-  const [profilesResult, petsResult, { data: { users: authUsers } }] = await Promise.all([
+  const [profilesResult, petsResult] = await Promise.all([
     supabaseAdmin.from("user_profiles").select("user_id, name, updated_at"),
     supabaseAdmin.from("pets").select("id, user_id, species, created_at"),
-    supabaseAdmin.auth.admin.listUsers(),
   ]);
+
+  // listUsers retorna no máximo 50 por página — paginar até buscar todos
+  const authUsers: Awaited<ReturnType<typeof supabaseAdmin.auth.admin.listUsers>>["data"]["users"] = [];
+  let page = 1;
+  while (true) {
+    const { data } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (!data?.users?.length) break;
+    authUsers.push(...data.users);
+    if (data.users.length < 1000) break;
+    page++;
+  }
 
   const now = new Date();
   const days30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
