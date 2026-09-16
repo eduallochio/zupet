@@ -10,7 +10,8 @@ async function getStats() {
   ]);
 
   // listUsers retorna no máximo 50 por página — paginar até buscar todos
-  const authUsers: Awaited<ReturnType<typeof supabaseAdmin.auth.admin.listUsers>>["data"]["users"] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const authUsers: any[] = [];
   let page = 1;
   while (true) {
     const { data } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });

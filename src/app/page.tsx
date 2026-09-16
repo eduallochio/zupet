@@ -324,17 +324,18 @@ export default async function LandingPage() {
 
               {/* Lado direito — mockup do app */}
               <ScaleIn delay={0.2} className="flex justify-center lg:justify-end">
-                <ParallaxSection speed={0.12}>
                 <div className="relative">
                   {/* Glow atrás do celular */}
                   <div aria-hidden className="absolute inset-0 rounded-[3rem]"
                     style={{ background: "radial-gradient(ellipse, oklch(0.62 0.18 174 / 0.25) 0%, transparent 70%)", filter: "blur(30px)", transform: "scale(1.2)" }} />
 
                   {/* Mockup flutuante animado */}
+                  <ParallaxSection speed={0.12} style={{ overflow: 'visible' }}>
                   <FloatingPhone
                     src="/screenshots/perfil-pet.png"
                     alt="Zupet — tela de perfil do pet"
                   />
+                  </ParallaxSection>
 
                   {/* Card flutuante — vacina */}
                   <FadeUp delay={0.5}>
@@ -389,7 +390,6 @@ export default async function LandingPage() {
                     </div>
                   </FadeIn>
                 </div>
-                </ParallaxSection>
               </ScaleIn>
             </div>
 
