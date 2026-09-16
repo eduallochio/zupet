@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { FadeUp, FadeIn, ScaleIn, StaggerChildren, StaggerItem } from "@/components/landing/AnimatedSection"; // StaggerChildren/StaggerItem usados em Features e FAQ
+import { SplitText } from "@/components/landing/SplitText";
 import CountUp from "@/components/landing/CountUp";
 import { ScrollStackWrapper as ScrollStack, ScrollStackItemWrapper as ScrollStackItem } from "@/components/landing/ScrollStackWrapper";
 import { TrackPageView, TrackableStoreLink } from "@/components/landing/TrackingProvider";
@@ -239,16 +240,20 @@ export default async function LandingPage() {
                   </div>
                 </FadeIn>
 
-                <FadeUp delay={0.08}>
-                  <h1 className="font-heading font-extrabold leading-[1.0] tracking-tight">
-                    <span className="block text-5xl md:text-6xl lg:text-7xl" style={{ color: "oklch(0.97 0 0)" }}>
-                      Seu pet merece
-                    </span>
-                    <span className="block text-5xl md:text-6xl lg:text-7xl animated-gradient-text">
-                      memória perfeita.
-                    </span>
-                  </h1>
-                </FadeUp>
+                <h1 className="font-heading font-extrabold leading-[1.0] tracking-tight mt-0">
+                  <SplitText
+                    text="Seu pet merece"
+                    className="text-5xl md:text-6xl lg:text-7xl"
+                    wordClassName="text-5xl md:text-6xl lg:text-7xl"
+                    delay={0.08}
+                  />
+                  <SplitText
+                    text="memória perfeita."
+                    className="animated-gradient-text text-5xl md:text-6xl lg:text-7xl"
+                    wordClassName="animated-gradient-text text-5xl md:text-6xl lg:text-7xl"
+                    delay={0.28}
+                  />
+                </h1>
 
                 <FadeUp delay={0.18}>
                   <p className="mt-6 text-base md:text-lg leading-relaxed max-w-md"
