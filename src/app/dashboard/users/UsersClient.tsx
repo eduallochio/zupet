@@ -6,7 +6,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
-import { Users, Calendar, PawPrint, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Calendar, PawPrint, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 
 const PAGE_SIZE = 20;
 
@@ -56,7 +56,7 @@ function ProviderBadges({ providers }: { providers: string[] }) {
   );
 }
 
-export default function UsersClient({ users }: { users: User[] }) {
+export default function UsersClient({ users, duplicates }: { users: User[]; duplicates: User[][] }) {
   const [page, setPage] = useState(1);
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
   const now = new Date();
@@ -81,6 +81,35 @@ export default function UsersClient({ users }: { users: User[] }) {
         <h1 className="font-heading text-3xl font-bold">Usuários</h1>
         <p className="text-muted-foreground text-sm mt-1">Todas as contas cadastradas no Zupet</p>
       </div>
+
+      {duplicates.length > 0 && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+            <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+            <p className="text-sm font-semibold">
+              {duplicates.length} possível{duplicates.length !== 1 ? "is" : ""} conta{duplicates.length !== 1 ? "s" : ""} duplicada{duplicates.length !== 1 ? "s" : ""} detectada{duplicates.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+          <div className="space-y-2">
+            {duplicates.map((group, i) => (
+              <div key={i} className="text-xs text-muted-foreground space-y-1">
+                <p className="font-medium text-foreground">{group[0].name}</p>
+                {group.map((u) => (
+                  <div key={u.id} className="flex items-center gap-2 pl-3 flex-wrap">
+                    <span className="font-mono text-[11px]">{u.id.slice(0, 8)}…</span>
+                    <span>{u.email}</span>
+                    <span className="text-amber-600">{u.pets} pet{u.pets !== 1 ? "s" : ""}</span>
+                    {u.providers.includes("apple") && <span className="text-slate-500">Apple</span>}
+                    {u.providers.includes("google") && <span className="text-blue-500">Google</span>}
+                    <span>{new Date(u.createdAt).toLocaleDateString("pt-BR")}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">Verifique se são a mesma pessoa e faça a migração manual via Supabase SQL se necessário.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>

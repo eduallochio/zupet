@@ -48,7 +48,19 @@ async function getUsers() {
     });
 }
 
+function findDuplicates(users: Awaited<ReturnType<typeof getUsers>>) {
+  const byName: Record<string, typeof users> = {};
+  for (const u of users) {
+    const key = u.name.trim().toLowerCase();
+    if (key === "—" || key === "") continue;
+    if (!byName[key]) byName[key] = [];
+    byName[key].push(u);
+  }
+  return Object.values(byName).filter((group) => group.length > 1);
+}
+
 export default async function UsersPage() {
   const users = await getUsers();
-  return <UsersClient users={users} />;
+  const duplicates = findDuplicates(users);
+  return <UsersClient users={users} duplicates={duplicates} />;
 }
