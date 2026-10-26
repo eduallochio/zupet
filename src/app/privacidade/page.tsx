@@ -121,8 +121,8 @@ export default function PrivacidadePage() {
             </p>
             <p className="mt-2">
               Para demais direitos, entre em contato:{" "}
-              <a href="mailto:privacidade@zupet.io" className="underline" style={{ color: "oklch(0.62 0.18 174)" }}>
-                privacidade@zupet.io
+              <a href="mailto:eduallochio2@outlook.com" className="underline" style={{ color: "oklch(0.62 0.18 174)" }}>
+                eduallochio2@outlook.com
               </a>
             </p>
           </section>
@@ -155,7 +155,7 @@ export default function PrivacidadePage() {
             <h2 className="text-base font-semibold mb-3" style={{ color: "oklch(0.95 0 0)" }}>11. Contato</h2>
             <p>
               Dúvidas sobre privacidade? Fale conosco:<br />
-              <a href="mailto:privacidade@zupet.io" className="underline" style={{ color: "oklch(0.62 0.18 174)" }}>privacidade@zupet.io</a><br />
+              <a href="mailto:eduallochio2@outlook.com" className="underline" style={{ color: "oklch(0.62 0.18 174)" }}>eduallochio2@outlook.com</a><br />
               <a href="https://zupet.io" className="underline" style={{ color: "oklch(0.62 0.18 174)" }}>zupet.io</a>
             </p>
           </section>

@@ -150,7 +150,7 @@ export default function TermosPage() {
             <h2 className="text-base font-semibold mb-3" style={{ color: "oklch(0.95 0 0)" }}>13. Contato</h2>
             <p>
               Dúvidas sobre estes termos? Entre em contato:<br />
-              <a href="mailto:contato@zupet.io" className="underline" style={{ color: "oklch(0.62 0.18 174)" }}>contato@zupet.io</a><br />
+              <a href="mailto:eduallochio2@outlook.com" className="underline" style={{ color: "oklch(0.62 0.18 174)" }}>eduallochio2@outlook.com</a><br />
               <a href="https://zupet.io" className="underline" style={{ color: "oklch(0.62 0.18 174)" }}>zupet.io</a>
             </p>
           </section>

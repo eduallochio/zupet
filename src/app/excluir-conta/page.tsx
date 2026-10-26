@@ -110,7 +110,7 @@ export default function ExcluirContaPage() {
                 Recebemos sua solicitação de exclusão da conta <strong>{cfg.label}</strong>. Processaremos em até <strong>7 dias úteis</strong> e enviaremos uma confirmação para o seu email.
               </p>
               <p className="text-gray-400 text-xs mt-4">
-                Caso tenha dúvidas, entre em contato: <a href="mailto:contato@zupet.io" className="text-[#e87c3a] hover:underline">contato@zupet.io</a>
+                Caso tenha dúvidas, entre em contato: <a href="mailto:eduallochio2@outlook.com" className="text-[#e87c3a] hover:underline">eduallochio2@outlook.com</a>
               </p>
             </div>
           ) : status === "duplicate" ? (
@@ -125,7 +125,7 @@ export default function ExcluirContaPage() {
                 Já existe uma solicitação em andamento para este email. Nossa equipe está processando o seu pedido.
               </p>
               <p className="text-gray-400 text-xs mt-4">
-                Dúvidas? <a href="mailto:contato@zupet.io" className="text-[#e87c3a] hover:underline">contato@zupet.io</a>
+                Dúvidas? <a href="mailto:eduallochio2@outlook.com" className="text-[#e87c3a] hover:underline">eduallochio2@outlook.com</a>
               </p>
             </div>
           ) : (
