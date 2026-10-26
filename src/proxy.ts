@@ -75,6 +75,8 @@ export async function proxy(request: NextRequest) {
   return applySecurityHeaders(NextResponse.next());
 }
 
-export const proxyConfig = {
-  matcher: ["/dashboard/:path*", "/login", "/api/:path*"],
+// Roda em todas as páginas (para aplicar os cabeçalhos de segurança), menos arquivos estáticos.
+// O Next só lê este objeto se ele se chamar "config".
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|.*\\.(?:png|jpg|jpeg|svg|ico|webp|txt|xml)$).*)"],
 };

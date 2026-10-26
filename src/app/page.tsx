@@ -150,9 +150,17 @@ const features = [
   { icon: "WifiOff", title: "Funciona Offline", description: "Acesse o histórico completo do seu pet sem internet. Sincroniza automaticamente na nuvem quando conectar — com backup seguro." },
 ];
 
+// Números públicos escondidos até ter dados satisfatórios. Enquanto false, nem consulta o banco.
+const SHOW_STATS = false;
+const EMPTY_STATS: Awaited<ReturnType<typeof getPublicStats>> = {
+  totalUsers: 0, totalPets: 0, totalPhotos: 0,
+  totalReminders: 0, totalDiary: 0, totalSpecies: 0,
+  avgPetsPerUser: 0, topSpecies: null,
+};
+
 export default async function LandingPage() {
-  const stats = await getPublicStats();
-  const hasStats = false; // temporariamente oculto até ter dados satisfatórios
+  const hasStats = SHOW_STATS;
+  const stats = hasStats ? await getPublicStats() : EMPTY_STATS;
 
   return (
     <>
@@ -197,13 +205,6 @@ export default async function LandingPage() {
                   <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
                 </svg>
               </a>
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium px-4 py-2 rounded-lg border transition-all hover:border-white/20 hover:text-white"
-                style={{ color: "oklch(0.80 0 0)", borderColor: "oklch(0.24 0 0)", background: "oklch(0.13 0 0)" }}
-              >
-                Painel
-              </Link>
               <a
                 href="#early-access"
                 className="text-sm font-semibold px-5 py-2 rounded-lg transition-all hover:opacity-90 hover:scale-[1.03] active:scale-95"
@@ -392,16 +393,6 @@ export default async function LandingPage() {
                 </div>
               </ScaleIn>
             </div>
-
-            {/* Scroll hint */}
-            <FadeIn delay={1.0}>
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2">
-                <span className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.72 0 0)" }}>scroll</span>
-                <div className="w-px h-8 relative overflow-hidden" style={{ background: "oklch(0.50 0 0)" }}>
-                  <div className="absolute top-0 left-0 w-full h-1/2 animate-bounce" style={{ background: "oklch(0.62 0.18 174)" }} />
-                </div>
-              </div>
-            </FadeIn>
           </div>
         </section>
 
@@ -848,8 +839,9 @@ export default async function LandingPage() {
                   </span>
                 </h2>
                 <p className="text-base leading-relaxed mb-10" style={{ color: "oklch(0.68 0 0)" }}>
-                  Junte-se a {hasStats ? stats.totalUsers.toLocaleString("pt-BR") : "milhares de"} tutores que já usam
-                  o Zupet para manter seus pets saudáveis e felizes.
+                  {hasStats
+                    ? `Junte-se a ${stats.totalUsers.toLocaleString("pt-BR")} tutores que já usam o Zupet para manter seus pets saudáveis e felizes.`
+                    : "Baixe grátis e tenha vacinas, consultas, lembretes e fotos do seu pet sempre à mão."}
                 </p>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3 flex-wrap">
@@ -991,7 +983,6 @@ export default async function LandingPage() {
                   <Link href="/privacidade" className="hover:text-white transition-colors">Privacidade</Link>
                   <Link href="/termos" className="hover:text-white transition-colors">Termos</Link>
                   <Link href="/excluir-conta" className="hover:text-white transition-colors">Excluir conta</Link>
-                  <Link href="/dashboard" className="hover:text-white transition-colors">Admin</Link>
                 </nav>
                 <a
                   href="https://www.instagram.com/zupet.io/"
