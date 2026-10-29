@@ -5,10 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
-import { Users, Calendar, PawPrint, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Users, Calendar, PawPrint, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 
 const PAGE_SIZE = 20;
+const DUPLICATES_COLLAPSED_KEY = "zupet:users:duplicatesCollapsed";
 
 type User = {
   id: string;
@@ -59,6 +60,22 @@ function ProviderBadges({ providers }: { providers: string[] }) {
 export default function UsersClient({ users, duplicates }: { users: User[]; duplicates: User[][] }) {
   const [page, setPage] = useState(1);
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
+  const [duplicatesCollapsed, setDuplicatesCollapsed] = useState(false);
+
+  // Lembra a escolha no navegador (lido após montar para não divergir do HTML do servidor)
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(DUPLICATES_COLLAPSED_KEY) === "1") setDuplicatesCollapsed(true);
+    } catch {}
+  }, []);
+
+  const toggleDuplicates = () => {
+    setDuplicatesCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(DUPLICATES_COLLAPSED_KEY, next ? "1" : "0"); } catch {}
+      return next;
+    });
+  };
   const now = new Date();
   const days30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const newUsers = users.filter((u) => new Date(u.createdAt) >= days30).length;
@@ -84,12 +101,23 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
 
       {duplicates.length > 0 && (
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 space-y-3">
-          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+          <button
+            type="button"
+            onClick={toggleDuplicates}
+            aria-expanded={!duplicatesCollapsed}
+            aria-controls="duplicates-list"
+            title={duplicatesCollapsed ? "Expandir lista" : "Minimizar lista"}
+            className="flex w-full items-center gap-2 text-left text-amber-700 dark:text-amber-400 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
+          >
             <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-            <p className="text-sm font-semibold">
+            <p className="text-sm font-semibold flex-1">
               {duplicates.length} possível{duplicates.length !== 1 ? "is" : ""} conta{duplicates.length !== 1 ? "s" : ""} duplicada{duplicates.length !== 1 ? "s" : ""} detectada{duplicates.length !== 1 ? "s" : ""}
             </p>
-          </div>
+            {duplicatesCollapsed
+              ? <ChevronDown className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+              : <ChevronUp className="h-4 w-4 flex-shrink-0" aria-hidden="true" />}
+          </button>
+          <div id="duplicates-list" hidden={duplicatesCollapsed} className="space-y-3">
           <div className="space-y-2">
             {duplicates.map((group, i) => (
               <div key={i} className="text-xs text-muted-foreground space-y-1">
@@ -108,6 +136,7 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
             ))}
           </div>
           <p className="text-[11px] text-muted-foreground">Verifique se são a mesma pessoa e faça a migração manual via Supabase SQL se necessário.</p>
+          </div>
         </div>
       )}
 
