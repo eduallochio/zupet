@@ -42,6 +42,9 @@ import {
   CreditCard,
   Ticket,
   Settings,
+  Bug,
+  Smartphone,
+  BellRing,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -98,6 +101,9 @@ const zupetGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { href: "/dashboard/health", label: "Saúde da Base", icon: ShieldCheck },
+      { href: "/dashboard/erros", label: "Erros do App", icon: Bug },
+      { href: "/dashboard/versions", label: "Versões do App", icon: Smartphone },
+      { href: "/dashboard/push", label: "Notificações Push", icon: BellRing },
       { href: "/dashboard/alerts", label: "Alertas", icon: Bell },
       { href: "/dashboard/stores", label: "Lojas", icon: Store },
       { href: "/dashboard/landing", label: "Landing Page", icon: Globe },
