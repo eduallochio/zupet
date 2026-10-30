@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import FilterTabs from "@/components/FilterTabs";
+import CollapsibleCard from "@/components/CollapsibleCard";
 import {
   ChartConfig,
   ChartContainer,
@@ -132,6 +133,14 @@ function AttentionItem({
   );
 }
 
+function AllClearBadge() {
+  return (
+    <Badge className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30 hover:bg-emerald-500/10">
+      <CheckCircle2 className="h-3 w-3 mr-1" /> Tudo em ordem
+    </Badge>
+  );
+}
+
 export default function OverviewClient({ stats }: { stats: Stats }) {
   const router = useRouter();
   const [period, setPeriod] = useState<Period>("30");
@@ -192,28 +201,26 @@ export default function OverviewClient({ stats }: { stats: Stats }) {
       </div>
 
       {/* Atenção agora */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <CardTitle>Atenção agora</CardTitle>
-              <CardDescription>O que pode precisar de uma ação sua</CardDescription>
-            </div>
-            {attentionTotal === 0 && (
-              <Badge className="bg-emerald-500/10 text-emerald-700 border-emerald-500/30 hover:bg-emerald-500/10">
-                <CheckCircle2 className="h-3 w-3 mr-1" /> Tudo em ordem
-              </Badge>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          <AttentionItem href="/dashboard/erros" icon={Bug} count={a.pendingErrors} label="Erros do app pendentes" tone="danger" />
-          <AttentionItem href="/dashboard/versions" icon={Smartphone} count={a.outdatedUsers} label={a.latestVersion ? `Usuários abaixo da v${a.latestVersion}` : "Usuários em versão antiga"} tone="warning" />
-          <AttentionItem href="/dashboard/push" icon={BellOff} count={a.noPushUsers} label="Usuários sem push" tone="warning" />
-          <AttentionItem href="/dashboard/deletions" icon={Trash2} count={a.pendingDeletions} label="Exclusões de conta pendentes" tone="danger" />
-          <AttentionItem href="/dashboard/users" icon={Copy} count={a.duplicateGroups} label="Possíveis contas duplicadas" tone="info" />
-        </CardContent>
-      </Card>
+      <CollapsibleCard
+        id="overview-attention"
+        title="Atenção agora"
+        description="O que pode precisar de uma ação sua"
+        actions={attentionTotal === 0 ? <AllClearBadge /> : undefined}
+        collapsedSummary={
+          attentionTotal === 0 ? (
+            <AllClearBadge />
+          ) : (
+            <Badge className="bg-rose-500/10 text-rose-700 border-rose-500/30 hover:bg-rose-500/10">{attentionTotal} para ver</Badge>
+          )
+        }
+        contentClassName="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"
+      >
+        <AttentionItem href="/dashboard/erros" icon={Bug} count={a.pendingErrors} label="Erros do app pendentes" tone="danger" />
+        <AttentionItem href="/dashboard/versions" icon={Smartphone} count={a.outdatedUsers} label={a.latestVersion ? `Usuários abaixo da v${a.latestVersion}` : "Usuários em versão antiga"} tone="warning" />
+        <AttentionItem href="/dashboard/push" icon={BellOff} count={a.noPushUsers} label="Usuários sem push" tone="warning" />
+        <AttentionItem href="/dashboard/deletions" icon={Trash2} count={a.pendingDeletions} label="Exclusões de conta pendentes" tone="danger" />
+        <AttentionItem href="/dashboard/users" icon={Copy} count={a.duplicateGroups} label="Possíveis contas duplicadas" tone="info" />
+      </CollapsibleCard>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -226,36 +233,36 @@ export default function OverviewClient({ stats }: { stats: Stats }) {
       </div>
 
       {/* Ativação */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <CardTitle>Ativação</CardTitle>
-              <CardDescription>Quantos usuários chegam a usar o app de verdade (registro = lembrete, vacina, peso ou foto)</CardDescription>
-            </div>
-            <Link href="/dashboard/funnel" className="text-xs text-primary hover:underline whitespace-nowrap">Funil completo</Link>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {activationSteps.map((s, i) => {
-            const pct = actPct(s.count, s.of);
-            return (
-              <div key={s.label}>
-                <div className="flex items-baseline justify-between gap-3 text-sm">
-                  <span className="font-medium">{s.label}</span>
-                  <span className="text-muted-foreground tabular-nums">
-                    {s.count.toLocaleString("pt-BR")} {i > 0 && <span className="text-xs">({pct}%)</span>}
-                  </span>
-                </div>
-                <div className="mt-1 h-2.5 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
-                </div>
-                {s.hint && <p className="text-[11px] text-muted-foreground mt-1">{s.hint}</p>}
+      <CollapsibleCard
+        id="overview-activation"
+        title="Ativação"
+        description="Quantos usuários chegam a usar o app de verdade (registro = lembrete, vacina, peso ou foto)"
+        actions={<Link href="/dashboard/funnel" className="text-xs text-primary hover:underline whitespace-nowrap">Funil completo</Link>}
+        collapsedSummary={
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {actPct(act.withPet, act.accounts)}% com pet · {actPct(act.withRecord, act.accounts)}% com registro
+          </span>
+        }
+        contentClassName="space-y-3"
+      >
+        {activationSteps.map((s, i) => {
+          const pct = actPct(s.count, s.of);
+          return (
+            <div key={s.label}>
+              <div className="flex items-baseline justify-between gap-3 text-sm">
+                <span className="font-medium">{s.label}</span>
+                <span className="text-muted-foreground tabular-nums">
+                  {s.count.toLocaleString("pt-BR")} {i > 0 && <span className="text-xs">({pct}%)</span>}
+                </span>
               </div>
-            );
-          })}
-        </CardContent>
-      </Card>
+              <div className="mt-1 h-2.5 rounded-full bg-secondary overflow-hidden">
+                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+              </div>
+              {s.hint && <p className="text-[11px] text-muted-foreground mt-1">{s.hint}</p>}
+            </div>
+          );
+        })}
+      </CollapsibleCard>
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -374,33 +381,33 @@ export default function OverviewClient({ stats }: { stats: Stats }) {
         </Card>
 
         {/* Resumo do walker */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Zupet Walker</CardTitle>
-                <CardDescription>Resumo do outro lado do produto</CardDescription>
+        <CollapsibleCard
+          id="overview-walker"
+          title="Zupet Walker"
+          description="Resumo do outro lado do produto"
+          actions={<Link href="/dashboard/walker/overview" className="text-xs text-primary hover:underline">Ver detalhes</Link>}
+          collapsedSummary={
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {stats.walker.total} walkers · {stats.walker.walks} passeios
+            </span>
+          }
+          contentClassName="grid grid-cols-2 gap-4"
+        >
+          {[
+            { label: "Walkers cadastrados", value: stats.walker.total, sub: `+${stats.walker.new30d} em 30 dias` },
+            { label: "Plano Pro", value: stats.walker.pro, sub: `de ${stats.walker.total} walkers` },
+            { label: "Passeios concluídos", value: stats.walker.walks, sub: "no total" },
+            { label: "Distância percorrida", value: `${stats.walker.km.toLocaleString("pt-BR")} km`, sub: "no total" },
+          ].map((m) => (
+            <div key={m.label} className="rounded-lg border border-border p-3">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Footprints className="h-3.5 w-3.5" aria-hidden="true" /> {m.label}
               </div>
-              <Link href="/dashboard/walker/overview" className="text-xs text-primary hover:underline">Ver detalhes</Link>
+              <p className="text-2xl font-heading font-bold mt-1">{m.value}</p>
+              <p className="text-[11px] text-muted-foreground">{m.sub}</p>
             </div>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-            {[
-              { label: "Walkers cadastrados", value: stats.walker.total, sub: `+${stats.walker.new30d} em 30 dias` },
-              { label: "Plano Pro", value: stats.walker.pro, sub: `de ${stats.walker.total} walkers` },
-              { label: "Passeios concluídos", value: stats.walker.walks, sub: "no total" },
-              { label: "Distância percorrida", value: `${stats.walker.km.toLocaleString("pt-BR")} km`, sub: "no total" },
-            ].map((m) => (
-              <div key={m.label} className="rounded-lg border border-border p-3">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Footprints className="h-3.5 w-3.5" aria-hidden="true" /> {m.label}
-                </div>
-                <p className="text-2xl font-heading font-bold mt-1">{m.value}</p>
-                <p className="text-[11px] text-muted-foreground">{m.sub}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+          ))}
+        </CollapsibleCard>
       </div>
     </div>
   );
