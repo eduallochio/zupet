@@ -6,6 +6,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Users, Calendar, PawPrint, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, AlertTriangle, Search } from "lucide-react";
 
@@ -27,6 +28,7 @@ type User = {
 };
 
 type PlatformFilter = "all" | "android" | "ios" | "unknown";
+type DuplicateGroup = { hash: string; users: User[] };
 
 function ProviderBadges({ providers }: { providers: string[] }) {
   return (
@@ -59,7 +61,19 @@ function ProviderBadges({ providers }: { providers: string[] }) {
   );
 }
 
-export default function UsersClient({ users, duplicates }: { users: User[]; duplicates: User[][] }) {
+export default function UsersClient({
+  users,
+  duplicates,
+  ignoredDuplicates,
+}: {
+  users: User[];
+  duplicates: DuplicateGroup[];
+  ignoredDuplicates: DuplicateGroup[];
+}) {
+  const router = useRouter();
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [dupError, setDupError] = useState<string | null>(null);
+  const [showIgnored, setShowIgnored] = useState(false);
   const [page, setPage] = useState(1);
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
   const [query, setQuery] = useState("");
@@ -79,6 +93,29 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
       return next;
     });
   };
+
+  // Marca (ou desfaz) "não são contas duplicadas" para um grupo
+  async function updateDuplicate(key: string, payload: Record<string, unknown>) {
+    setBusyKey(key);
+    setDupError(null);
+    try {
+      const res = await fetch("/api/duplicates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Erro desconhecido");
+      }
+      router.refresh();
+    } catch (e: unknown) {
+      setDupError(e instanceof Error ? e.message : "Erro ao salvar");
+    } finally {
+      setBusyKey(null);
+    }
+  }
+
   const now = new Date();
   const days30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const newUsers = users.filter((u) => new Date(u.createdAt) >= days30).length;
@@ -130,10 +167,21 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
           </button>
           <div id="duplicates-list" hidden={duplicatesCollapsed} className="space-y-3">
           <div className="space-y-2">
-            {duplicates.map((group, i) => (
-              <div key={i} className="text-xs text-muted-foreground space-y-1">
-                <p className="font-medium text-foreground">{group[0].name}</p>
-                {group.map((u) => (
+            {duplicates.map((group) => (
+              <div key={group.hash} className="text-xs text-muted-foreground space-y-1">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <p className="font-medium text-foreground">{group.users[0].name}</p>
+                  <button
+                    type="button"
+                    onClick={() => updateDuplicate(group.hash, { action: "dismiss", ids: group.users.map((u) => u.id) })}
+                    disabled={busyKey !== null}
+                    title="Esconde este grupo do alerta. Se entrar outra conta com o mesmo nome, ele volta."
+                    className="text-[11px] px-2.5 h-7 rounded-md border border-amber-500/40 text-amber-700 hover:bg-amber-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {busyKey === group.hash ? "Salvando…" : "Não são duplicadas"}
+                  </button>
+                </div>
+                {group.users.map((u) => (
                   <div key={u.id} className="flex items-center gap-2 pl-3 flex-wrap">
                     <span className="font-mono text-[11px]">{u.id.slice(0, 8)}…</span>
                     <span>{u.email}</span>
@@ -147,7 +195,37 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
             ))}
           </div>
           <p className="text-[11px] text-muted-foreground">Verifique se são a mesma pessoa e faça a migração manual via Supabase SQL se necessário.</p>
+          {dupError && <p className="text-[11px] text-rose-600">{dupError}</p>}
           </div>
+        </div>
+      )}
+
+      {ignoredDuplicates.length > 0 && (
+        <div className="text-xs text-muted-foreground">
+          <button type="button" onClick={() => setShowIgnored((v) => !v)} aria-expanded={showIgnored} className="underline underline-offset-2 hover:text-foreground">
+            {ignoredDuplicates.length} grupo{ignoredDuplicates.length !== 1 ? "s" : ""} marcado{ignoredDuplicates.length !== 1 ? "s" : ""} como &quot;não são duplicadas&quot; {showIgnored ? "(ocultar)" : "(ver)"}
+          </button>
+          {showIgnored && (
+            <div className="mt-2 space-y-2 rounded-lg border border-border p-3">
+              {ignoredDuplicates.map((group) => (
+                <div key={group.hash} className="flex items-center justify-between gap-3 flex-wrap">
+                  <span>
+                    <span className="font-medium text-foreground">{group.users[0].name}</span>
+                    {" · "}{group.users.map((u) => u.email).join(", ")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => updateDuplicate(group.hash, { action: "restore", hash: group.hash })}
+                    disabled={busyKey !== null}
+                    className="text-[11px] px-2.5 h-7 rounded-md border border-border hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {busyKey === group.hash ? "Salvando…" : "Voltar a alertar"}
+                  </button>
+                </div>
+              ))}
+              {dupError && <p className="text-[11px] text-rose-600">{dupError}</p>}
+            </div>
+          )}
         </div>
       )}
 

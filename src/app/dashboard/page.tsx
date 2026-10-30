@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { compareVersions, compareVersionsDesc } from "@/lib/semver";
+import { splitDuplicateGroups } from "@/lib/duplicates";
 import OverviewClient from "./OverviewClient";
 
 export const revalidate = 60; // ISR: regenera a página a cada 60 segundos
@@ -91,12 +92,14 @@ async function getStats() {
 
   const nameById: Record<string, string> = {};
   for (const p of profiles) if (p.name) nameById[p.user_id] = p.name;
-  const byName: Record<string, number> = {};
-  for (const u of authUsers) {
-    const name = (nameById[u.id] ?? u.user_metadata?.name ?? u.user_metadata?.full_name ?? "").trim().toLowerCase();
-    if (name) byName[name] = (byName[name] ?? 0) + 1;
-  }
-  const duplicateGroups = Object.values(byName).filter((n) => n > 1).length;
+  // Mesma regra da tela de Usuários: grupos marcados como "não são duplicadas" não contam
+  const { pending: pendingDuplicates } = await splitDuplicateGroups(
+    authUsers.map((u) => ({
+      id: u.id as string,
+      name: (nameById[u.id] ?? u.user_metadata?.name ?? u.user_metadata?.full_name ?? "—") as string,
+    }))
+  );
+  const duplicateGroups = pendingDuplicates.length;
 
   // ── Usuários mais recentes (pela data de cadastro) ──────────────────────
   const recentUsers = [...authUsers]

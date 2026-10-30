@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import UsersClient from "./UsersClient";
+import { splitDuplicateGroups } from "@/lib/duplicates";
 
 export const dynamic = "force-dynamic";
 
@@ -53,19 +54,9 @@ async function getUsers() {
     });
 }
 
-function findDuplicates(users: Awaited<ReturnType<typeof getUsers>>) {
-  const byName: Record<string, typeof users> = {};
-  for (const u of users) {
-    const key = u.name.trim().toLowerCase();
-    if (key === "—" || key === "") continue;
-    if (!byName[key]) byName[key] = [];
-    byName[key].push(u);
-  }
-  return Object.values(byName).filter((group) => group.length > 1);
-}
-
 export default async function UsersPage() {
   const users = await getUsers();
-  const duplicates = findDuplicates(users);
-  return <UsersClient users={users} duplicates={duplicates} />;
+  // Grupos que o admin marcou como "não são duplicadas" saem do alerta (ficam em `ignored`, com opção de restaurar)
+  const { pending, ignored } = await splitDuplicateGroups(users);
+  return <UsersClient users={users} duplicates={pending} ignoredDuplicates={ignored} />;
 }
