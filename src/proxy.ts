@@ -44,12 +44,31 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Proteger apenas /dashboard/*
-  if (!pathname.startsWith("/dashboard")) {
+  // Proteger /dashboard/* e as rotas /api/* que alteram dados (usam a chave de serviço do banco).
+  // Ficam públicas só: login/logout, rastreio da landing e o formulário público de exclusão de conta.
+  const isApi = pathname.startsWith("/api/");
+  const isPublicApi =
+    pathname.startsWith("/api/auth/") ||
+    pathname.startsWith("/api/track/") ||
+    (pathname === "/api/deletion-request" && request.method === "POST");
+  if (!pathname.startsWith("/dashboard") && !(isApi && !isPublicApi)) {
     return applySecurityHeaders(NextResponse.next());
   }
 
   const token = request.cookies.get(COOKIE_NAME)?.value;
+
+  if (isApi) {
+    let session: Awaited<ReturnType<typeof verifyToken>> = null;
+    try {
+      session = token ? await verifyToken(token) : null;
+    } catch {
+      session = null;
+    }
+    if (!session) {
+      return applySecurityHeaders(NextResponse.json({ error: "Não autorizado" }, { status: 401 }));
+    }
+    return applySecurityHeaders(NextResponse.next());
+  }
 
   if (!token) {
     const loginUrl = new URL("/login", request.url);
