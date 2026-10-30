@@ -46,9 +46,12 @@ const chartConfig: ChartConfig = {};
 export default function PetsClient({
   pets,
   speciesData,
+  initialSpecies,
 }: {
   pets: Pet[];
   speciesData: { name: string; value: number }[];
+  /** Espécie vinda do link (ex.: clique no gráfico da Visão Geral). Ignorada se não existir. */
+  initialSpecies?: string;
 }) {
   const router = useRouter();
 
@@ -63,7 +66,9 @@ export default function PetsClient({
   const sorted = [...speciesData].sort((a, b) => b.value - a.value);
 
   // Filtro por espécie: vale para os botões da tabela e para os cliques nos cards/gráfico (clicar de novo limpa)
-  const [speciesFilter, setSpeciesFilter] = useState<string>("all");
+  const [speciesFilter, setSpeciesFilter] = useState<string>(
+    initialSpecies && speciesData.some((s) => s.name === initialSpecies) ? initialSpecies : "all"
+  );
   const [genderFilter, setGenderFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);

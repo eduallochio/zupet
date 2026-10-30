@@ -8,11 +8,14 @@ export default function FilterTabs<T extends string>({
   value,
   onChange,
   label = "Filtrar",
+  clearable = true,
 }: {
   options: FilterOption<T>[];
   value: T;
   onChange: (key: T) => void;
   label?: string;
+  /** Clicar no filtro já marcado volta para a primeira opção. Desligar quando uma opção sempre precisa estar escolhida (ex.: período). */
+  clearable?: boolean;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1" role="group" aria-label={label}>
@@ -20,7 +23,7 @@ export default function FilterTabs<T extends string>({
         <button
           key={o.key}
           // Clicar no filtro já marcado desmarca e volta para a primeira opção ("Todos")
-          onClick={() => onChange(value === o.key ? options[0].key : o.key)}
+          onClick={() => onChange(clearable && value === o.key ? options[0].key : o.key)}
           aria-pressed={value === o.key}
           className={`h-8 px-3 rounded-md text-xs font-medium transition-colors ${value === o.key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
         >

@@ -63,7 +63,7 @@ async function getPets() {
   };
 }
 
-export default async function PetsPage() {
-  const data = await getPets();
-  return <PetsClient pets={data.pets} speciesData={data.speciesData} />;
+export default async function PetsPage({ searchParams }: { searchParams: Promise<{ species?: string }> }) {
+  const [data, { species }] = await Promise.all([getPets(), searchParams]);
+  return <PetsClient pets={data.pets} speciesData={data.speciesData} initialSpecies={species} />;
 }
