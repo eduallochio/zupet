@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BookOpen, Calendar } from "lucide-react";
+import { formatAppDate } from "@/lib/dates";
 
 type DiaryEntry = {
   id: string;
@@ -195,7 +196,7 @@ export default function DiaryClient({
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {e.date ? new Date(e.date).toLocaleDateString("pt-BR") : "—"}
+                        {formatAppDate(e.date)}
                       </div>
                     </TableCell>
                     <TableCell>

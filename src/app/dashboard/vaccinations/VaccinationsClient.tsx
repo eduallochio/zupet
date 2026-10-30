@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Syringe, AlertTriangle, Clock, Calendar } from "lucide-react";
 
 type Vaccination = {
@@ -30,7 +31,8 @@ function speciesEmoji(s: string): string {
 function dueDateStatus(nextDueDate: string | null): "overdue" | "soon" | "ok" | "none" {
   if (!nextDueDate) return "none";
   const now = new Date();
-  const d = new Date(nextDueDate);
+  const d = parseAppDate(nextDueDate);
+  if (!d) return "none";
   const diff = (d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
   if (diff < 0) return "overdue";
   if (diff <= 30) return "soon";
@@ -159,13 +161,13 @@ export default function VaccinationsClient({
                       <TableCell>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          {v.dateAdministered ? new Date(v.dateAdministered).toLocaleDateString("pt-BR") : "—"}
+                          {formatAppDate(v.dateAdministered)}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          {v.nextDueDate ? new Date(v.nextDueDate).toLocaleDateString("pt-BR") : "—"}
+                          {formatAppDate(v.nextDueDate)}
                         </div>
                       </TableCell>
                       <TableCell className="pr-6">

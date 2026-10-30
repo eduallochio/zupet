@@ -8,7 +8,7 @@ async function getDiaryEntries() {
     supabaseAdmin
       .from("pet_diary")
       .select("id, user_id, pet_id, date, mood, notes, created_at")
-      .order("date", { ascending: false }),
+      .order("created_at", { ascending: false }), // `date` é texto dd/mm/aaaa: ordenar por ele embaralha os meses
     supabaseAdmin.from("user_profiles").select("user_id, name"),
     supabaseAdmin.from("pets").select("id, name, species"),
   ]);

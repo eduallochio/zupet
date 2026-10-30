@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import VaccinationsClient from "./VaccinationsClient";
+import { parseAppDate } from "@/lib/dates";
 
 export const revalidate = 60;
 
@@ -8,7 +9,7 @@ async function getVaccinations() {
     supabaseAdmin
       .from("vaccinations")
       .select("id, user_id, pet_id, vaccine_name, date_administered, next_due_date, created_at")
-      .order("date_administered", { ascending: false }),
+      .order("created_at", { ascending: false }),
     supabaseAdmin.from("user_profiles").select("user_id, name"),
     supabaseAdmin.from("pets").select("id, name, species"),
   ]);
@@ -20,10 +21,13 @@ async function getVaccinations() {
   for (const p of pets ?? []) petMap[p.id] = { name: p.name ?? "—", species: p.species ?? "—" };
 
   const now = new Date();
-  const overdue = (vaccinations ?? []).filter((v) => v.next_due_date && new Date(v.next_due_date) < now).length;
+  const overdue = (vaccinations ?? []).filter((v) => {
+    const d = parseAppDate(v.next_due_date);
+    return d !== null && d < now;
+  }).length;
   const upcoming30 = (vaccinations ?? []).filter((v) => {
-    if (!v.next_due_date) return false;
-    const d = new Date(v.next_due_date);
+    const d = parseAppDate(v.next_due_date);
+    if (!d) return false;
     const diff = (d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
     return diff >= 0 && diff <= 30;
   }).length;

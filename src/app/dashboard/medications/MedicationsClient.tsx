@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Pill, Calendar } from "lucide-react";
 
 type Medication = {
@@ -154,8 +155,8 @@ export default function MedicationsClient({
                     <TableCell>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {m.startDate ? new Date(m.startDate).toLocaleDateString("pt-BR") : "—"}
-                        {m.endDate ? ` → ${new Date(m.endDate).toLocaleDateString("pt-BR")}` : ""}
+                        {formatAppDate(m.startDate)}
+                        {m.endDate ? ` → ${formatAppDate(m.endDate)}` : ""}
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{m.vet ?? "—"}</TableCell>

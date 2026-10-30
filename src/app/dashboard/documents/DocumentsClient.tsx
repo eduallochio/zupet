@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { FileText, Calendar } from "lucide-react";
 
 type Document = {
@@ -171,7 +172,7 @@ export default function DocumentsClient({
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {d.date ? new Date(d.date).toLocaleDateString("pt-BR") : "—"}
+                        {formatAppDate(d.date)}
                       </div>
                     </TableCell>
                     <TableCell className="pr-6 text-sm text-muted-foreground max-w-[200px] truncate">

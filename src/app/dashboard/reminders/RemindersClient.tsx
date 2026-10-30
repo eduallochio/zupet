@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Bell, CheckCircle2, Clock, Calendar } from "lucide-react";
 
 type Reminder = {
@@ -199,7 +200,7 @@ export default function RemindersClient({
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {r.date ? new Date(r.date).toLocaleDateString("pt-BR") : "—"}
+                        {formatAppDate(r.date)}
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">

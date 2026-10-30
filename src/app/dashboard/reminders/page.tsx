@@ -8,7 +8,7 @@ async function getReminders() {
     supabaseAdmin
       .from("reminders")
       .select("id, user_id, pet_id, category, description, date, recurrence, completed, completed_at, medication_dose, notes, created_at")
-      .order("date", { ascending: false }),
+      .order("created_at", { ascending: false }),
     supabaseAdmin.from("user_profiles").select("user_id, name"),
     supabaseAdmin.from("pets").select("id, name"),
   ]);

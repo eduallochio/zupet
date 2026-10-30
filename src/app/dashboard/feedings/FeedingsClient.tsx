@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Utensils, Calendar } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -167,7 +168,7 @@ export default function FeedingsClient({
                       {f.lastRefillDate ? (
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          {new Date(f.lastRefillDate).toLocaleDateString("pt-BR")}
+                          {formatAppDate(f.lastRefillDate)}
                         </div>
                       ) : (
                         <span className="text-sm text-muted-foreground">—</span>

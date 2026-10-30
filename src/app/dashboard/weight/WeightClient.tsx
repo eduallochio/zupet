@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Weight, Calendar } from "lucide-react";
 
 type WeightRecord = {
@@ -140,7 +141,7 @@ export default function WeightClient({
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {r.date ? new Date(r.date).toLocaleDateString("pt-BR") : "—"}
+                        {formatAppDate(r.date)}
                       </div>
                     </TableCell>
                     <TableCell className="pr-6 text-sm text-muted-foreground max-w-[200px] truncate">

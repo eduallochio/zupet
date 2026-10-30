@@ -8,7 +8,7 @@ async function getWeightRecords() {
     supabaseAdmin
       .from("weight_records")
       .select("id, user_id, pet_id, weight, date, note, created_at")
-      .order("date", { ascending: false }),
+      .order("created_at", { ascending: false }),
     supabaseAdmin.from("user_profiles").select("user_id, name"),
     supabaseAdmin.from("pets").select("id, name, species"),
   ]);

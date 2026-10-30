@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import PrescriptionsClient from "./PrescriptionsClient";
+import { parseAppDate } from "@/lib/dates";
 
 export const revalidate = 60;
 
@@ -8,7 +9,7 @@ async function getPrescriptions() {
     supabaseAdmin
       .from("pet_prescriptions")
       .select("id, user_id, pet_id, vet_name, clinic_name, consult_date, expiry_date, medications, dosage, duration, notes, created_at")
-      .order("consult_date", { ascending: false }),
+      .order("created_at", { ascending: false }),
     supabaseAdmin.from("user_profiles").select("user_id, name"),
     supabaseAdmin.from("pets").select("id, name, species"),
   ]);
@@ -21,7 +22,10 @@ async function getPrescriptions() {
 
   const now = new Date();
   const active = (prescriptions ?? []).filter(
-    (p) => !p.expiry_date || new Date(p.expiry_date) >= now
+    (p) => {
+      const d = parseAppDate(p.expiry_date);
+      return !d || d >= now;
+    }
   ).length;
 
   return {

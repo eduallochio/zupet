@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { ClipboardList, Calendar } from "lucide-react";
 
 type Prescription = {
@@ -34,7 +35,9 @@ function speciesEmoji(s: string): string {
 
 function prescriptionStatus(expiryDate: string | null): "active" | "expired" | "none" {
   if (!expiryDate) return "none";
-  return new Date(expiryDate) >= new Date() ? "active" : "expired";
+  const d = parseAppDate(expiryDate);
+  if (!d) return "none";
+  return d >= new Date() ? "active" : "expired";
 }
 
 export default function PrescriptionsClient({
@@ -163,13 +166,13 @@ export default function PrescriptionsClient({
                       <TableCell>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          {p.consultDate ? new Date(p.consultDate).toLocaleDateString("pt-BR") : "—"}
+                          {formatAppDate(p.consultDate)}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          {p.expiryDate ? new Date(p.expiryDate).toLocaleDateString("pt-BR") : "—"}
+                          {formatAppDate(p.expiryDate)}
                         </div>
                       </TableCell>
                       <TableCell className="pr-6">
