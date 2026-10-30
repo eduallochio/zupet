@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BookOpen, Calendar } from "lucide-react";
 import { formatAppDate } from "@/lib/dates";
+import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 
 type DiaryEntry = {
   id: string;
@@ -66,7 +67,9 @@ export default function DiaryClient({
     return () => clearInterval(interval);
   }, [router]);
 
+  const [page, setPage] = useState(1);
   const total = entries.length;
+  const pageEntries = entries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const sickCount = moodCount["sick"] ?? 0;
 
   return (
@@ -182,7 +185,7 @@ export default function DiaryClient({
                   </TableCell>
                 </TableRow>
               ) : (
-                entries.map((e) => (
+                pageEntries.map((e) => (
                   <TableRow key={e.id}>
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-2">
@@ -213,6 +216,7 @@ export default function DiaryClient({
             </TableBody>
           </Table>
         </CardContent>
+        <Pagination page={page} total={total} onPageChange={setPage} />
       </Card>
     </div>
   );

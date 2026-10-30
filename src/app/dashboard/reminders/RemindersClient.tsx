@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAppDate, parseAppDate } from "@/lib/dates";
+import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 import { Bell, CheckCircle2, Clock, Calendar } from "lucide-react";
 
 type Reminder = {
@@ -40,6 +41,8 @@ const RECURRENCE_LABELS: Record<string, string> = {
   custom: "Personalizado",
 };
 
+type StatusFilter = "all" | "pending" | "done";
+
 const CATEGORY_COLORS: Record<string, string> = {
   medication: "bg-blue-500/10 text-blue-600 border-blue-200",
   vaccine: "bg-green-500/10 text-green-600 border-green-200",
@@ -67,6 +70,22 @@ export default function RemindersClient({
   const completed = reminders.filter((r) => r.completed).length;
   const pending = total - completed;
   const sorted = [...categoryData].sort((a, b) => b.value - a.value);
+
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [page, setPage] = useState(1);
+  const filtered = reminders.filter((r) =>
+    statusFilter === "all" ? true : statusFilter === "done" ? r.completed : !r.completed
+  );
+  const pageReminders = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const filterOptions: { key: StatusFilter; label: string; count: number }[] = [
+    { key: "all", label: "Todos", count: total },
+    { key: "pending", label: "Pendentes", count: pending },
+    { key: "done", label: "Concluídos", count: completed },
+  ];
+  const changeFilter = (f: StatusFilter) => {
+    setStatusFilter(f);
+    setPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -159,8 +178,20 @@ export default function RemindersClient({
 
       {/* Tabela */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between space-y-0">
           <CardTitle>Todos os Lembretes</CardTitle>
+          <div className="flex items-center gap-1" role="group" aria-label="Filtrar por status">
+            {filterOptions.map((o) => (
+              <button
+                key={o.key}
+                onClick={() => changeFilter(o.key)}
+                aria-pressed={statusFilter === o.key}
+                className={`h-8 px-3 rounded-md text-xs font-medium transition-colors ${statusFilter === o.key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
+              >
+                {o.label} <span className="opacity-70">({o.count})</span>
+              </button>
+            ))}
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -175,14 +206,14 @@ export default function RemindersClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {reminders.length === 0 ? (
+              {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground py-12 text-sm">
-                    Nenhum lembrete cadastrado ainda
+                    {reminders.length === 0 ? "Nenhum lembrete cadastrado ainda" : "Nenhum lembrete com esse status"}
                   </TableCell>
                 </TableRow>
               ) : (
-                reminders.map((r) => (
+                pageReminders.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="pl-6">
                       <p className="text-sm font-medium max-w-[200px] truncate">{r.description}</p>
@@ -217,6 +248,7 @@ export default function RemindersClient({
             </TableBody>
           </Table>
         </CardContent>
+        <Pagination page={page} total={filtered.length} onPageChange={setPage} />
       </Card>
     </div>
   );

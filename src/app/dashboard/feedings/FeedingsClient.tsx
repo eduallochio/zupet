@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAppDate, parseAppDate } from "@/lib/dates";
+import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 import { Utensils, Calendar } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -43,7 +44,9 @@ export default function FeedingsClient({
     return () => clearInterval(interval);
   }, [router]);
 
+  const [page, setPage] = useState(1);
   const total = feedings.length;
+  const pageFeedings = feedings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const maxBrand = topBrands[0]?.[1] ?? 1;
 
   return (
@@ -151,7 +154,7 @@ export default function FeedingsClient({
                   </TableCell>
                 </TableRow>
               ) : (
-                feedings.map((f) => (
+                pageFeedings.map((f) => (
                   <TableRow key={f.id}>
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-2">
@@ -183,6 +186,7 @@ export default function FeedingsClient({
             </TableBody>
           </Table>
         </CardContent>
+        <Pagination page={page} total={total} onPageChange={setPage} />
       </Card>
     </div>
   );
