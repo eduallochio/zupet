@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Weight, Calendar } from "lucide-react";
+import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 
 type WeightRecord = {
   id: string;
@@ -40,6 +41,9 @@ export default function WeightClient({
     const interval = setInterval(() => router.refresh(), 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [router]);
+
+  const [page, setPage] = useState(1);
+  const pageRecords = records.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const minW = records.length > 0 ? Math.min(...records.map((r) => r.weight)).toFixed(1) : "—";
   const maxW = records.length > 0 ? Math.max(...records.map((r) => r.weight)).toFixed(1) : "—";
@@ -124,7 +128,7 @@ export default function WeightClient({
                   </TableCell>
                 </TableRow>
               ) : (
-                records.map((r) => (
+                pageRecords.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-2">
@@ -153,6 +157,7 @@ export default function WeightClient({
             </TableBody>
           </Table>
         </CardContent>
+        <Pagination page={page} total={records.length} onPageChange={setPage} />
       </Card>
     </div>
   );

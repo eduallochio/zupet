@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Syringe, AlertTriangle, Clock, Calendar } from "lucide-react";
+import Pagination, { PAGE_SIZE } from "@/components/Pagination";
+import FilterTabs from "@/components/FilterTabs";
 
 type Vaccination = {
   id: string;
@@ -39,6 +41,8 @@ function dueDateStatus(nextDueDate: string | null): "overdue" | "soon" | "ok" | 
   return "ok";
 }
 
+type StatusFilter = "all" | "overdue" | "soon" | "ok" | "none";
+
 export default function VaccinationsClient({
   vaccinations,
   overdue,
@@ -54,6 +58,20 @@ export default function VaccinationsClient({
     const interval = setInterval(() => router.refresh(), 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [router]);
+
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [page, setPage] = useState(1);
+  const withStatus = vaccinations.map((v) => ({ v, status: dueDateStatus(v.nextDueDate) }));
+  const countOf = (s: StatusFilter) => withStatus.filter((x) => x.status === s).length;
+  const filtered = withStatus.filter((x) => statusFilter === "all" || x.status === statusFilter);
+  const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const filterOptions = [
+    { key: "all" as const, label: "Todas", count: vaccinations.length },
+    { key: "overdue" as const, label: "Atrasadas", count: countOf("overdue") },
+    { key: "soon" as const, label: "Vencem em breve", count: countOf("soon") },
+    { key: "ok" as const, label: "Em dia", count: countOf("ok") },
+    { key: "none" as const, label: "Sem data", count: countOf("none") },
+  ];
 
   return (
     <div className="space-y-6">
@@ -110,7 +128,7 @@ export default function VaccinationsClient({
                 <Syringe className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-heading font-bold">{vaccinations.length - overdue - upcoming30}</p>
+                <p className="text-2xl font-heading font-bold">{countOf("ok")}</p>
                 <p className="text-xs text-muted-foreground">Em dia</p>
               </div>
             </div>
@@ -120,8 +138,9 @@ export default function VaccinationsClient({
 
       {/* Tabela */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between space-y-0">
           <CardTitle>Todas as Vacinações</CardTitle>
+          <FilterTabs options={filterOptions} value={statusFilter} onChange={(f) => { setStatusFilter(f); setPage(1); }} label="Filtrar por situação" />
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -135,15 +154,14 @@ export default function VaccinationsClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {vaccinations.length === 0 ? (
+              {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-12 text-sm">
-                    Nenhuma vacinação registrada ainda
+                    {vaccinations.length === 0 ? "Nenhuma vacinação registrada ainda" : "Nenhuma vacinação nessa situação"}
                   </TableCell>
                 </TableRow>
               ) : (
-                vaccinations.map((v) => {
-                  const status = dueDateStatus(v.nextDueDate);
+                pageItems.map(({ v, status }) => {
                   return (
                     <TableRow key={v.id}>
                       <TableCell className="pl-6">
@@ -183,6 +201,7 @@ export default function VaccinationsClient({
             </TableBody>
           </Table>
         </CardContent>
+        <Pagination page={page} total={filtered.length} onPageChange={setPage} />
       </Card>
     </div>
   );

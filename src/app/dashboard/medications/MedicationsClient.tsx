@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Pill, Calendar } from "lucide-react";
+import Pagination, { PAGE_SIZE } from "@/components/Pagination";
+import FilterTabs from "@/components/FilterTabs";
 
 type Medication = {
   id: string;
@@ -33,6 +35,8 @@ function speciesEmoji(s: string): string {
   return "🐾";
 }
 
+type StatusFilter = "all" | "active" | "done";
+
 export default function MedicationsClient({
   medications,
   activeCount,
@@ -46,6 +50,18 @@ export default function MedicationsClient({
     const interval = setInterval(() => router.refresh(), 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [router]);
+
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [page, setPage] = useState(1);
+  const filtered = medications.filter((m) =>
+    statusFilter === "all" ? true : statusFilter === "active" ? m.active : !m.active
+  );
+  const pageMedications = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const filterOptions = [
+    { key: "all" as const, label: "Todos", count: medications.length },
+    { key: "active" as const, label: "Em tratamento", count: activeCount },
+    { key: "done" as const, label: "Concluídos", count: medications.length - activeCount },
+  ];
 
   return (
     <div className="space-y-6">
@@ -110,8 +126,9 @@ export default function MedicationsClient({
 
       {/* Tabela */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between space-y-0">
           <CardTitle>Todos os Medicamentos</CardTitle>
+          <FilterTabs options={filterOptions} value={statusFilter} onChange={(f) => { setStatusFilter(f); setPage(1); }} label="Filtrar por status" />
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -126,14 +143,14 @@ export default function MedicationsClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {medications.length === 0 ? (
+              {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground py-12 text-sm">
-                    Nenhum medicamento registrado ainda
+                    {medications.length === 0 ? "Nenhum medicamento registrado ainda" : "Nenhum medicamento com esse status"}
                   </TableCell>
                 </TableRow>
               ) : (
-                medications.map((m) => (
+                pageMedications.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="pl-6">
                       <p className="text-sm font-medium">{m.name}</p>
@@ -171,6 +188,7 @@ export default function MedicationsClient({
             </TableBody>
           </Table>
         </CardContent>
+        <Pagination page={page} total={filtered.length} onPageChange={setPage} />
       </Card>
     </div>
   );

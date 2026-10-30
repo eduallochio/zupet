@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Phone } from "lucide-react";
+import Pagination, { PAGE_SIZE } from "@/components/Pagination";
+import FilterTabs from "@/components/FilterTabs";
 
 type Contact = {
   id: string;
@@ -57,6 +59,15 @@ export default function EmergencyContactsClient({
     return () => clearInterval(interval);
   }, [router]);
 
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const filtered = contacts.filter((c) => typeFilter === "all" || c.type === typeFilter);
+  const pageContacts = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const filterOptions = [
+    { key: "all", label: "Todos", count: contacts.length },
+    ...Object.entries(TYPE_LABELS).map(([key, label]) => ({ key, label, count: typeCount[key] ?? 0 })),
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -98,8 +109,9 @@ export default function EmergencyContactsClient({
 
       {/* Tabela */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between space-y-0">
           <CardTitle>Todos os Contatos</CardTitle>
+          <FilterTabs options={filterOptions} value={typeFilter} onChange={(f) => { setTypeFilter(f); setPage(1); }} label="Filtrar por tipo" />
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -113,14 +125,14 @@ export default function EmergencyContactsClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {contacts.length === 0 ? (
+              {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-12 text-sm">
-                    Nenhum contato de emergência cadastrado ainda
+                    {contacts.length === 0 ? "Nenhum contato de emergência cadastrado ainda" : "Nenhum contato desse tipo"}
                   </TableCell>
                 </TableRow>
               ) : (
-                contacts.map((c) => (
+                pageContacts.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell className="pl-6">
                       <p className="text-sm font-medium">{c.name}</p>
@@ -155,6 +167,7 @@ export default function EmergencyContactsClient({
             </TableBody>
           </Table>
         </CardContent>
+        <Pagination page={page} total={filtered.length} onPageChange={setPage} />
       </Card>
     </div>
   );

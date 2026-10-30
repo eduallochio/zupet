@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { ClipboardList, Calendar } from "lucide-react";
+import Pagination, { PAGE_SIZE } from "@/components/Pagination";
+import FilterTabs from "@/components/FilterTabs";
 
 type Prescription = {
   id: string;
@@ -40,6 +42,8 @@ function prescriptionStatus(expiryDate: string | null): "active" | "expired" | "
   return d >= new Date() ? "active" : "expired";
 }
 
+type StatusFilter = "all" | "active" | "expired";
+
 export default function PrescriptionsClient({
   prescriptions,
   activeCount,
@@ -55,6 +59,20 @@ export default function PrescriptionsClient({
   }, [router]);
 
   const expired = prescriptions.length - activeCount;
+
+  // "Ativas" inclui as sem validade, igual ao cartão de resumo
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [page, setPage] = useState(1);
+  const filtered = prescriptions.filter((p) => {
+    const isExpired = prescriptionStatus(p.expiryDate) === "expired";
+    return statusFilter === "all" ? true : statusFilter === "expired" ? isExpired : !isExpired;
+  });
+  const pagePrescriptions = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const filterOptions = [
+    { key: "all" as const, label: "Todas", count: prescriptions.length },
+    { key: "active" as const, label: "Ativas", count: activeCount },
+    { key: "expired" as const, label: "Vencidas", count: expired },
+  ];
 
   return (
     <div className="space-y-6">
@@ -119,8 +137,9 @@ export default function PrescriptionsClient({
 
       {/* Tabela */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between space-y-0">
           <CardTitle>Todas as Prescrições</CardTitle>
+          <FilterTabs options={filterOptions} value={statusFilter} onChange={(f) => { setStatusFilter(f); setPage(1); }} label="Filtrar por validade" />
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -135,14 +154,14 @@ export default function PrescriptionsClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {prescriptions.length === 0 ? (
+              {filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground py-12 text-sm">
-                    Nenhuma prescrição registrada ainda
+                    {prescriptions.length === 0 ? "Nenhuma prescrição registrada ainda" : "Nenhuma prescrição com essa validade"}
                   </TableCell>
                 </TableRow>
               ) : (
-                prescriptions.map((p) => {
+                pagePrescriptions.map((p) => {
                   const status = prescriptionStatus(p.expiryDate);
                   return (
                     <TableRow key={p.id}>
@@ -187,6 +206,7 @@ export default function PrescriptionsClient({
             </TableBody>
           </Table>
         </CardContent>
+        <Pagination page={page} total={filtered.length} onPageChange={setPage} />
       </Card>
     </div>
   );

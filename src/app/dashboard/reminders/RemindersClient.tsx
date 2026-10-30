@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAppDate, parseAppDate } from "@/lib/dates";
 import Pagination, { PAGE_SIZE } from "@/components/Pagination";
+import FilterTabs from "@/components/FilterTabs";
 import { Bell, CheckCircle2, Clock, Calendar } from "lucide-react";
 
 type Reminder = {
@@ -180,18 +181,7 @@ export default function RemindersClient({
       <Card>
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between space-y-0">
           <CardTitle>Todos os Lembretes</CardTitle>
-          <div className="flex items-center gap-1" role="group" aria-label="Filtrar por status">
-            {filterOptions.map((o) => (
-              <button
-                key={o.key}
-                onClick={() => changeFilter(o.key)}
-                aria-pressed={statusFilter === o.key}
-                className={`h-8 px-3 rounded-md text-xs font-medium transition-colors ${statusFilter === o.key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
-              >
-                {o.label} <span className="opacity-70">({o.count})</span>
-              </button>
-            ))}
-          </div>
+          <FilterTabs options={filterOptions} value={statusFilter} onChange={changeFilter} label="Filtrar por status" />
         </CardHeader>
         <CardContent className="p-0">
           <Table>
