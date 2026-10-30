@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -14,7 +15,7 @@ import {
   ChartTooltip,
 } from "@/components/ui/chart";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
-import { PawPrint, Calendar } from "lucide-react";
+import { PawPrint, Calendar, Search } from "lucide-react";
 import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 import FilterTabs from "@/components/FilterTabs";
 
@@ -27,6 +28,7 @@ type Pet = {
   gender: string;
   castrated: boolean;
   owner: string;
+  ownerId: string;
   emoji: string;
   createdAt: string;
 };
@@ -63,6 +65,7 @@ export default function PetsClient({
   // Filtro por espécie: vale para os botões da tabela e para os cliques nos cards/gráfico (clicar de novo limpa)
   const [speciesFilter, setSpeciesFilter] = useState<string>("all");
   const [genderFilter, setGenderFilter] = useState<string>("all");
+  const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
 
   const toggleSpecies = (name: string) => {
@@ -70,8 +73,12 @@ export default function PetsClient({
     setPage(1);
   };
 
+  const q = query.trim().toLowerCase();
   const filtered = pets.filter(
-    (p) => (speciesFilter === "all" || p.species === speciesFilter) && (genderFilter === "all" || p.gender === genderFilter)
+    (p) =>
+      (speciesFilter === "all" || p.species === speciesFilter) &&
+      (genderFilter === "all" || p.gender === genderFilter) &&
+      (!q || [p.name, p.breed, p.owner].some((s) => s.toLowerCase().includes(q)))
   );
   const pagePets = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -231,6 +238,17 @@ export default function PetsClient({
       <Card>
         <CardHeader className="flex flex-col gap-3 space-y-0">
           <CardTitle>Todos os Pets</CardTitle>
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+              placeholder="Buscar pet, raça ou dono…"
+              aria-label="Buscar pets"
+              className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
           <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-6">
             <FilterTabs options={speciesOptions} value={speciesFilter} onChange={(f) => { setSpeciesFilter(f); setPage(1); }} label="Filtrar por espécie" />
             <FilterTabs options={genderOptions} value={genderFilter} onChange={(f) => { setGenderFilter(f); setPage(1); }} label="Filtrar por gênero" />
@@ -272,7 +290,9 @@ export default function PetsClient({
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{pet.age}</TableCell>
                     <TableCell className="text-sm text-muted-foreground capitalize">{pet.gender}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{pet.owner}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      <Link href={`/dashboard/users/${pet.ownerId}`} className="hover:underline hover:text-foreground">{pet.owner}</Link>
+                    </TableCell>
                     <TableCell className="pr-6">
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />

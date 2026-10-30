@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 async function getUsers() {
   const [{ data: profiles }, { data: petRows }, { data: { users: authUsers } }, { data: walkerProfiles }, { data: identities }] = await Promise.all([
     supabaseAdmin.from("user_profiles").select("user_id, name, city, state, platform, app_version, updated_at"),
-    supabaseAdmin.from("pets").select("user_id"),
+    supabaseAdmin.from("pets").select("user_id, name"),
     supabaseAdmin.auth.admin.listUsers({ perPage: 1000 }),
     supabaseAdmin.from("walker_profiles").select("user_id"),
     supabaseAdmin.from("identities").select("user_id, provider"),
@@ -18,7 +18,11 @@ async function getUsers() {
   for (const p of profiles ?? []) profileMap[p.user_id] = p;
 
   const countMap: Record<string, number> = {};
-  for (const p of petRows ?? []) countMap[p.user_id] = (countMap[p.user_id] ?? 0) + 1;
+  const petNamesMap: Record<string, string[]> = {};
+  for (const p of petRows ?? []) {
+    countMap[p.user_id] = (countMap[p.user_id] ?? 0) + 1;
+    (petNamesMap[p.user_id] ??= []).push(p.name ?? "");
+  }
 
   const providersMap: Record<string, string[]> = {};
   for (const i of identities ?? []) {
@@ -39,6 +43,7 @@ async function getUsers() {
           ? `${profile.city}, ${profile.state}`
           : profile?.city ?? profile?.state ?? "—",
         pets: countMap[u.id] ?? 0,
+        petNames: petNamesMap[u.id] ?? [],
         createdAt: u.created_at,
         platform: (profile?.platform as "android" | "ios" | null) ?? null,
         appVersion: profile?.app_version ?? null,

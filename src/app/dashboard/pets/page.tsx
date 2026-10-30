@@ -55,6 +55,7 @@ async function getPets() {
       gender: p.gender ?? "—",
       castrated: p.castrated ?? false,
       owner: profileMap[p.user_id] ?? "—",
+      ownerId: p.user_id as string,
       emoji: speciesEmoji(p.species ?? ""),
       createdAt: p.created_at,
     })),

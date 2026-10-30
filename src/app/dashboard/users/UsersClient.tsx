@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Users, Calendar, PawPrint, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import { Users, Calendar, PawPrint, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, AlertTriangle, Search } from "lucide-react";
 
 const PAGE_SIZE = 20;
 const DUPLICATES_COLLAPSED_KEY = "zupet:users:duplicatesCollapsed";
@@ -17,6 +18,7 @@ type User = {
   email: string;
   location: string;
   pets: number;
+  petNames: string[];
   createdAt: string;
   platform: "android" | "ios" | null;
   appVersion: string | null;
@@ -60,6 +62,7 @@ function ProviderBadges({ providers }: { providers: string[] }) {
 export default function UsersClient({ users, duplicates }: { users: User[]; duplicates: User[][] }) {
   const [page, setPage] = useState(1);
   const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
+  const [query, setQuery] = useState("");
   const [duplicatesCollapsed, setDuplicatesCollapsed] = useState(false);
 
   // Lembra a escolha no navegador (lido após montar para não divergir do HTML do servidor)
@@ -89,8 +92,16 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
     : platformFilter === "ios" ? users.filter((u) => u.platform === "ios")
     : users.filter((u) => !u.platform);
 
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
-  const paginatedUsers = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // Busca por nome, e-mail, ID ou nome de pet
+  const q = query.trim().toLowerCase();
+  const searchedUsers = q
+    ? filteredUsers.filter((u) =>
+        [u.name, u.email, u.id, ...u.petNames].some((s) => s.toLowerCase().includes(q))
+      )
+    : filteredUsers;
+
+  const totalPages = Math.max(1, Math.ceil(searchedUsers.length / PAGE_SIZE));
+  const paginatedUsers = searchedUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -205,11 +216,22 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
         <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-3">
           <div>
             <CardTitle>Todos os Usuários</CardTitle>
-            {platformFilter !== "all" && (
+            {(platformFilter !== "all" || q) && (
               <p className="text-xs text-muted-foreground mt-0.5">
-                {filteredUsers.length} de {users.length} usuários
+                {searchedUsers.length} de {users.length} usuários
               </p>
             )}
+            <div className="relative mt-2 w-full sm:w-72">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+                placeholder="Buscar nome, e-mail, ID ou pet…"
+                aria-label="Buscar usuários"
+                className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
             {(["all", "android", "ios", "unknown"] as PlatformFilter[]).map((f) => {
@@ -238,7 +260,7 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
 
         {/* Mobile: cards */}
         <div className="md:hidden divide-y divide-border">
-          {filteredUsers.length === 0 ? (
+          {searchedUsers.length === 0 ? (
             <p className="text-center text-muted-foreground py-12 text-sm">Nenhum usuário encontrado</p>
           ) : (
             paginatedUsers.map((user) => {
@@ -250,7 +272,7 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-medium truncate">{user.name}</p>
+                      <Link href={`/dashboard/users/${user.id}`} className="text-sm font-medium truncate hover:underline">{user.name}</Link>
                       {isNew && (
                         <Badge className="text-[10px] px-1.5 py-0 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/10">
                           novo
@@ -311,7 +333,7 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.length === 0 ? (
+              {searchedUsers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-muted-foreground py-12 text-sm">
                     Nenhum usuário encontrado
@@ -328,7 +350,7 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
                             {user.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-sm font-medium">{user.name}</p>
+                            <Link href={`/dashboard/users/${user.id}`} className="text-sm font-medium hover:underline">{user.name}</Link>
                             <p className="text-xs text-muted-foreground font-mono">{user.id.slice(0, 8)}…</p>
                             <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                               <Badge className="text-[9px] px-1 py-0 h-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">
@@ -400,7 +422,7 @@ export default function UsersClient({ users, duplicates }: { users: User[]; dupl
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-6 py-3 border-t border-border">
             <p className="text-xs text-muted-foreground">
-              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filteredUsers.length)} de {filteredUsers.length.toLocaleString("pt-BR")} usuários
+              {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, searchedUsers.length)} de {searchedUsers.length.toLocaleString("pt-BR")} usuários
             </p>
             <div className="flex items-center gap-1">
               <button
