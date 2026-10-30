@@ -8,11 +8,23 @@ const TZ = "America/Sao_Paulo";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SERIES_DAYS = 180; // 90 dias do período mais 90 anteriores, para calcular a tendência
 
+// IDs distintos de usuários com ao menos uma linha na tabela (paginado: o Supabase devolve no máximo 1000 por consulta)
+async function distinctUserIds(table: string): Promise<Set<string>> {
+  const ids = new Set<string>();
+  for (let from = 0; ; from += 1000) {
+    const { data } = await supabaseAdmin.from(table).select("user_id").order("id").range(from, from + 999);
+    if (!data?.length) break;
+    for (const r of data) ids.add(r.user_id);
+    if (data.length < 1000) break;
+  }
+  return ids;
+}
+
 // Dia (aaaa-mm-dd) no fuso do Brasil, para os cadastros não "virarem de dia" em UTC
 const dayKey = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: TZ });
 
 async function getStats() {
-  const [profilesRes, petsRes, errorsRes, deletionsRes, walkersRes, walksRes] = await Promise.all([
+  const [profilesRes, petsRes, errorsRes, deletionsRes, walkersRes, walksRes, petOwners, ...recordOwners] = await Promise.all([
     supabaseAdmin
       .from("user_profiles")
       .select("user_id, name, updated_at, app_version, expo_push_token, fcm_token, push_notifications_enabled"),
@@ -21,6 +33,12 @@ async function getStats() {
     supabaseAdmin.from("deletion_requests").select("id", { count: "exact", head: true }).in("status", ["pending", "processing"]),
     supabaseAdmin.from("walker_profiles").select("plan, created_at"),
     supabaseAdmin.from("walk_sessions").select("ended_at, distance_meters"),
+    distinctUserIds("pets"),
+    // Mesmos registros que a tela de Funil considera
+    distinctUserIds("reminders"),
+    distinctUserIds("vaccinations"),
+    distinctUserIds("weight_records"),
+    distinctUserIds("pet_photos"),
   ]);
 
   // listUsers retorna no máximo 1000 por página — paginar até buscar todos
@@ -91,6 +109,14 @@ async function getStats() {
       createdAt: u.created_at as string,
     }));
 
+  // ── Ativação: conta → pet → primeiro registro ───────────────────────────
+  const accountIds = new Set<string>(authUsers.map((u) => u.id as string));
+  const withPet = [...petOwners].filter((id) => accountIds.has(id)).length;
+  const withRecord = new Set<string>();
+  for (const owners of recordOwners) for (const id of owners) if (accountIds.has(id)) withRecord.add(id);
+  const withPetNoRecord = [...petOwners].filter((id) => accountIds.has(id) && !withRecord.has(id)).length;
+  const activation = { accounts: authUsers.length, withPet, withRecord: withRecord.size, withPetNoRecord };
+
   // ── Resumo do walker ────────────────────────────────────────────────────
   const walkers = walkersRes.data ?? [];
   const walks = (walksRes.data ?? []).filter((w) => w.ended_at !== null);
@@ -110,6 +136,7 @@ async function getStats() {
     active7d: activeSince(7),
     active30d: activeSince(30),
     dailySeries,
+    activation,
     speciesData,
     recentUsers,
     attention: {

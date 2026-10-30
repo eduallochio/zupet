@@ -29,6 +29,7 @@ type Stats = {
   active7d: number;
   active30d: number;
   dailySeries: { date: string; users: number; pets: number }[];
+  activation: { accounts: number; withPet: number; withRecord: number; withPetNoRecord: number };
   speciesData: { name: string; value: number }[];
   recentUsers: { id: string; name: string; email: string; createdAt: string }[];
   attention: {
@@ -163,6 +164,14 @@ export default function OverviewClient({ stats }: { stats: Stats }) {
   const speciesTotal = stats.speciesData.reduce((a, b) => a + b.value, 0);
   const goToSpecies = (name: string) => router.push(`/dashboard/pets?species=${encodeURIComponent(name)}`);
 
+  const act = stats.activation;
+  const actPct = (n: number, of: number) => (of > 0 ? Math.round((n / of) * 100) : 0);
+  const activationSteps = [
+    { label: "Criaram a conta", count: act.accounts, of: act.accounts, hint: null as string | null },
+    { label: "Cadastraram um pet", count: act.withPet, of: act.accounts, hint: `${act.accounts - act.withPet} pararam antes de cadastrar um pet` },
+    { label: "Fizeram um registro", count: act.withRecord, of: act.accounts, hint: `${act.withPetNoRecord} com pet ainda sem nenhum registro` },
+  ];
+
   const a = stats.attention;
   const attentionTotal = a.pendingErrors + a.outdatedUsers + a.noPushUsers + a.pendingDeletions + a.duplicateGroups;
   const activePct = (n: number) => (stats.totalUsers > 0 ? Math.round((n / stats.totalUsers) * 100) : 0);
@@ -215,6 +224,38 @@ export default function OverviewClient({ stats }: { stats: Stats }) {
         <KpiCard title={`Novos usuários (${days}d)`} value={newUsers} icon={TrendingUp} trend={usersTrend} sub={trendLabel} />
         <KpiCard title={`Novos pets (${days}d)`} value={newPets} icon={PawPrint} trend={petsTrend} sub={trendLabel} />
       </div>
+
+      {/* Ativação */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle>Ativação</CardTitle>
+              <CardDescription>Quantos usuários chegam a usar o app de verdade (registro = lembrete, vacina, peso ou foto)</CardDescription>
+            </div>
+            <Link href="/dashboard/funnel" className="text-xs text-primary hover:underline whitespace-nowrap">Funil completo</Link>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {activationSteps.map((s, i) => {
+            const pct = actPct(s.count, s.of);
+            return (
+              <div key={s.label}>
+                <div className="flex items-baseline justify-between gap-3 text-sm">
+                  <span className="font-medium">{s.label}</span>
+                  <span className="text-muted-foreground tabular-nums">
+                    {s.count.toLocaleString("pt-BR")} {i > 0 && <span className="text-xs">({pct}%)</span>}
+                  </span>
+                </div>
+                <div className="mt-1 h-2.5 rounded-full bg-secondary overflow-hidden">
+                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                </div>
+                {s.hint && <p className="text-[11px] text-muted-foreground mt-1">{s.hint}</p>}
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
