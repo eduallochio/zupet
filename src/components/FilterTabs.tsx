@@ -19,7 +19,8 @@ export default function FilterTabs<T extends string>({
       {options.map((o) => (
         <button
           key={o.key}
-          onClick={() => onChange(o.key)}
+          // Clicar no filtro já marcado desmarca e volta para a primeira opção ("Todos")
+          onClick={() => onChange(value === o.key ? options[0].key : o.key)}
           aria-pressed={value === o.key}
           className={`h-8 px-3 rounded-md text-xs font-medium transition-colors ${value === o.key ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:text-foreground hover:bg-secondary"}`}
         >
