@@ -45,6 +45,7 @@ import {
   Bug,
   Smartphone,
   BellRing,
+  Download,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -103,6 +104,7 @@ const zupetGroups: NavGroup[] = [
       { href: "/dashboard/health", label: "Saúde da Base", icon: ShieldCheck },
       { href: "/dashboard/erros", label: "Erros do App", icon: Bug },
       { href: "/dashboard/versions", label: "Versões do App", icon: Smartphone },
+      { href: "/dashboard/atualizacao", label: "Atualização do App", icon: Download },
       { href: "/dashboard/push", label: "Notificações Push", icon: BellRing },
       { href: "/dashboard/alerts", label: "Alertas", icon: Bell },
       { href: "/dashboard/stores", label: "Lojas", icon: Store },
