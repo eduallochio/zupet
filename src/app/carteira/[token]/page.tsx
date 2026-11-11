@@ -10,6 +10,19 @@ export const metadata: Metadata = {
 
 const UUID_OR_TOKEN = /^[0-9a-f-]{36}$/i;
 
+const SPECIES_LABELS: Record<string, string> = { dog: "Cachorro", cat: "Gato", other: "Outro" };
+const GENDER_LABELS: Record<string, string> = { male: "Macho", female: "Fêmea" };
+
+function translateSpecies(species: string | null): string {
+  if (!species) return "";
+  return SPECIES_LABELS[species.toLowerCase()] ?? species;
+}
+
+function translateGender(gender: string | null): string {
+  if (!gender) return "";
+  return GENDER_LABELS[gender.toLowerCase()] ?? gender;
+}
+
 async function getShareData(token: string) {
   if (!UUID_OR_TOKEN.test(token)) return null;
 
@@ -20,7 +33,7 @@ async function getShareData(token: string) {
   if (!petId) return null;
 
   const [petRes, vaccRes, medRes, weightRes, emergRes] = await Promise.all([
-    supabaseAdmin.from("pets").select("id, name, species, breed, dob, gender, castrated, microchip, food_allergies, med_allergies, restrictions").eq("id", petId).maybeSingle(),
+    supabaseAdmin.from("pets").select("id, name, species, breed, dob, gender, castrated, microchip, weight, food_allergies, med_allergies, restrictions").eq("id", petId).maybeSingle(),
     supabaseAdmin.from("vaccinations").select("vaccine_name, date_administered, next_due_date").eq("pet_id", petId).order("date_administered", { ascending: false }),
     supabaseAdmin.from("pet_medications").select("name, dosage, frequency, active, vet").eq("pet_id", petId).order("created_at", { ascending: false }),
     supabaseAdmin.from("weight_records").select("weight, date").eq("pet_id", petId).order("date", { ascending: false }).limit(5),
@@ -66,6 +79,8 @@ export default async function CarteiraPublicaPage({ params }: { params: Promise<
   const activeMeds = medications.filter((m) => m.active);
   const hasAllergies = (pet.food_allergies?.length ?? 0) > 0 || (pet.med_allergies?.length ?? 0) > 0 || !!pet.restrictions;
   const overdueVaccines = vaccines.filter((v) => isOverdue(v.next_due_date));
+  // weight_records é o histórico; alguns pets (ex.: cadastrados pelo app walker) só têm o peso solto em pets.weight
+  const currentWeight = weights[0]?.weight ?? pet.weight ?? null;
 
   return (
     <main className="min-h-screen bg-slate-50 pb-12">
@@ -78,7 +93,7 @@ export default async function CarteiraPublicaPage({ params }: { params: Promise<
           </div>
           <div>
             <h1 className="text-xl font-bold">{pet.name}</h1>
-            <p className="text-sm text-teal-100">{[pet.species, pet.breed, pet.gender].filter(Boolean).join(" · ")}</p>
+            <p className="text-sm text-teal-100">{[translateSpecies(pet.species), pet.breed, translateGender(pet.gender)].filter(Boolean).join(" · ")}</p>
           </div>
         </div>
       </div>
@@ -113,7 +128,7 @@ export default async function CarteiraPublicaPage({ params }: { params: Promise<
           <dl className="grid grid-cols-3 gap-3 text-center">
             {[
               { label: "Nascimento", value: formatAppDate(pet.dob) },
-              { label: "Peso", value: weights[0] ? `${weights[0].weight} kg` : "—" },
+              { label: "Peso", value: currentWeight !== null ? `${currentWeight} kg` : "—" },
               { label: "Castrado", value: pet.castrated === true ? "Sim" : pet.castrated === false ? "Não" : "—" },
             ].map((item) => (
               <div key={item.label}>
@@ -186,7 +201,16 @@ export default async function CarteiraPublicaPage({ params }: { params: Promise<
         <section className="rounded-2xl bg-white p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-bold text-slate-800">⚖️ Histórico de Peso</h2>
           {weights.length === 0 ? (
-            <p className="py-2 text-center text-xs text-slate-400">Nenhum peso registrado</p>
+            pet.weight !== null ? (
+              <ul className="space-y-1">
+                <li className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500">Peso cadastrado</span>
+                  <span className="font-semibold text-slate-800">{pet.weight} kg</span>
+                </li>
+              </ul>
+            ) : (
+              <p className="py-2 text-center text-xs text-slate-400">Nenhum peso registrado</p>
+            )
           ) : (
             <ul className="space-y-1">
               {weights.map((w, i) => (
