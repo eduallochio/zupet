@@ -8,6 +8,7 @@ import { formatAppDate, parseAppDate } from "@/lib/dates";
 import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 import { Utensils, Calendar } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import SpeciesIcon from "@/components/SpeciesIcon";
 
 type Feeding = {
   id: string;
@@ -21,14 +22,6 @@ type Feeding = {
   createdAt: string;
 };
 
-function speciesEmoji(s: string): string {
-  const l = s.toLowerCase();
-  if (l.includes("cachorro") || l.includes("dog")) return "🐶";
-  if (l.includes("gato") || l.includes("cat")) return "🐱";
-  if (l.includes("ssaro") || l.includes("bird")) return "🐦";
-  if (l.includes("coelho")) return "🐰";
-  return "🐾";
-}
 
 export default function FeedingsClient({
   feedings,
@@ -158,7 +151,7 @@ export default function FeedingsClient({
                   <TableRow key={f.id}>
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{speciesEmoji(f.petSpecies)}</span>
+                        <SpeciesIcon species={f.petSpecies} />
                         <div>
                           <p className="text-sm font-medium">{f.petName}</p>
                           <p className="text-xs text-muted-foreground">{f.owner}</p>

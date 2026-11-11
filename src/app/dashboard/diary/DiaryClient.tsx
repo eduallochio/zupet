@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { BookOpen, Calendar } from "lucide-react";
 import { formatAppDate } from "@/lib/dates";
 import Pagination, { PAGE_SIZE } from "@/components/Pagination";
+import SpeciesIcon from "@/components/SpeciesIcon";
 
 type DiaryEntry = {
   id: string;
@@ -44,14 +45,6 @@ const MOOD_COLORS: Record<string, string> = {
   sick: "bg-red-500/10 text-red-600 border-red-200",
 };
 
-function speciesEmoji(s: string): string {
-  const l = s.toLowerCase();
-  if (l.includes("cachorro") || l.includes("dog")) return "🐶";
-  if (l.includes("gato") || l.includes("cat")) return "🐱";
-  if (l.includes("ssaro") || l.includes("bird")) return "🐦";
-  if (l.includes("coelho")) return "🐰";
-  return "🐾";
-}
 
 export default function DiaryClient({
   entries,
@@ -189,7 +182,7 @@ export default function DiaryClient({
                   <TableRow key={e.id}>
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{speciesEmoji(e.petSpecies)}</span>
+                        <SpeciesIcon species={e.petSpecies} />
                         <div>
                           <p className="text-sm font-medium">{e.petName}</p>
                           <p className="text-xs text-muted-foreground">{e.owner}</p>

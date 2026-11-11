@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Weight, Calendar } from "lucide-react";
 import Pagination, { PAGE_SIZE } from "@/components/Pagination";
+import SpeciesIcon from "@/components/SpeciesIcon";
 
 type WeightRecord = {
   id: string;
@@ -19,14 +20,6 @@ type WeightRecord = {
   createdAt: string;
 };
 
-function speciesEmoji(s: string): string {
-  const l = s.toLowerCase();
-  if (l.includes("cachorro") || l.includes("dog")) return "🐶";
-  if (l.includes("gato") || l.includes("cat")) return "🐱";
-  if (l.includes("ssaro") || l.includes("bird")) return "🐦";
-  if (l.includes("coelho")) return "🐰";
-  return "🐾";
-}
 
 export default function WeightClient({
   records,
@@ -132,7 +125,7 @@ export default function WeightClient({
                   <TableRow key={r.id}>
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{speciesEmoji(r.petSpecies)}</span>
+                        <SpeciesIcon species={r.petSpecies} />
                         <div>
                           <p className="text-sm font-medium">{r.petName}</p>
                           <p className="text-xs text-muted-foreground">{r.owner}</p>

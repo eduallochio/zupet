@@ -9,6 +9,7 @@ import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { Syringe, AlertTriangle, Clock, Calendar } from "lucide-react";
 import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 import FilterTabs from "@/components/FilterTabs";
+import SpeciesIcon from "@/components/SpeciesIcon";
 
 type Vaccination = {
   id: string;
@@ -21,14 +22,6 @@ type Vaccination = {
   createdAt: string;
 };
 
-function speciesEmoji(s: string): string {
-  const l = s.toLowerCase();
-  if (l.includes("cachorro") || l.includes("dog")) return "🐶";
-  if (l.includes("gato") || l.includes("cat")) return "🐱";
-  if (l.includes("ssaro") || l.includes("bird")) return "🐦";
-  if (l.includes("coelho")) return "🐰";
-  return "🐾";
-}
 
 function dueDateStatus(nextDueDate: string | null): "overdue" | "soon" | "ok" | "none" {
   if (!nextDueDate) return "none";
@@ -169,7 +162,7 @@ export default function VaccinationsClient({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className="text-lg">{speciesEmoji(v.petSpecies)}</span>
+                          <SpeciesIcon species={v.petSpecies} />
                           <div>
                             <p className="text-sm font-medium">{v.petName}</p>
                             <p className="text-xs text-muted-foreground">{v.owner}</p>

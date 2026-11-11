@@ -18,6 +18,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { PawPrint, Calendar, Search } from "lucide-react";
 import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 import FilterTabs from "@/components/FilterTabs";
+import SpeciesIcon from "@/components/SpeciesIcon";
 
 type Pet = {
   id: string;
@@ -29,7 +30,6 @@ type Pet = {
   castrated: boolean;
   owner: string;
   ownerId: string;
-  emoji: string;
   createdAt: string;
 };
 
@@ -283,7 +283,7 @@ export default function PetsClient({
                   <TableRow key={pet.id}>
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-3">
-                        <span className="text-xl">{pet.emoji}</span>
+                        <SpeciesIcon species={pet.species} size={24} />
                         <span className="text-sm font-medium">{pet.name}</span>
                       </div>
                     </TableCell>

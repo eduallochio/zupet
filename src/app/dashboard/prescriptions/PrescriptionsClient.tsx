@@ -9,6 +9,7 @@ import { formatAppDate, parseAppDate } from "@/lib/dates";
 import { ClipboardList, Calendar } from "lucide-react";
 import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 import FilterTabs from "@/components/FilterTabs";
+import SpeciesIcon from "@/components/SpeciesIcon";
 
 type Prescription = {
   id: string;
@@ -26,14 +27,6 @@ type Prescription = {
   createdAt: string;
 };
 
-function speciesEmoji(s: string): string {
-  const l = s.toLowerCase();
-  if (l.includes("cachorro") || l.includes("dog")) return "🐶";
-  if (l.includes("gato") || l.includes("cat")) return "🐱";
-  if (l.includes("ssaro") || l.includes("bird")) return "🐦";
-  if (l.includes("coelho")) return "🐰";
-  return "🐾";
-}
 
 function prescriptionStatus(expiryDate: string | null): "active" | "expired" | "none" {
   if (!expiryDate) return "none";
@@ -171,7 +164,7 @@ export default function PrescriptionsClient({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className="text-lg">{speciesEmoji(p.petSpecies)}</span>
+                          <SpeciesIcon species={p.petSpecies} />
                           <div>
                             <p className="text-sm font-medium">{p.petName}</p>
                             <p className="text-xs text-muted-foreground">{p.owner}</p>

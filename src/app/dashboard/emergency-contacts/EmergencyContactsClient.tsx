@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Phone } from "lucide-react";
 import Pagination, { PAGE_SIZE } from "@/components/Pagination";
 import FilterTabs from "@/components/FilterTabs";
+import SpeciesIcon from "@/components/SpeciesIcon";
 
 type Contact = {
   id: string;
@@ -36,14 +37,6 @@ const TYPE_COLORS: Record<string, string> = {
   other: "bg-gray-500/10 text-gray-600 border-gray-200",
 };
 
-function speciesEmoji(s: string): string {
-  const l = s.toLowerCase();
-  if (l.includes("cachorro") || l.includes("dog")) return "🐶";
-  if (l.includes("gato") || l.includes("cat")) return "🐱";
-  if (l.includes("ssaro") || l.includes("bird")) return "🐦";
-  if (l.includes("coelho")) return "🐰";
-  return "🐾";
-}
 
 export default function EmergencyContactsClient({
   contacts,
@@ -151,7 +144,7 @@ export default function EmergencyContactsClient({
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{speciesEmoji(c.petSpecies)}</span>
+                        <SpeciesIcon species={c.petSpecies} />
                         <div>
                           <p className="text-sm font-medium">{c.petName}</p>
                           <p className="text-xs text-muted-foreground">{c.owner}</p>

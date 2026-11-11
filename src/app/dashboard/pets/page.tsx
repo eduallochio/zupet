@@ -20,16 +20,6 @@ function calcAge(dob: string | null): string {
   return `${Math.floor(months / 12)}a`;
 }
 
-function speciesEmoji(s: string): string {
-  const l = s.toLowerCase();
-  if (l.includes("cachorro") || l.includes("dog")) return "🐶";
-  if (l.includes("gato") || l.includes("cat")) return "🐱";
-  if (l.includes("ssaro") || l.includes("bird")) return "🐦";
-  if (l.includes("coelho")) return "🐰";
-  if (l.includes("peixe")) return "🐠";
-  return "🐾";
-}
-
 async function getPets() {
   const [{ data: pets }, { data: profiles }] = await Promise.all([
     supabaseAdmin.from("pets").select("id, user_id, name, species, breed, dob, gender, castrated, created_at").order("created_at", { ascending: false }),
@@ -56,7 +46,6 @@ async function getPets() {
       castrated: p.castrated ?? false,
       owner: profileMap[p.user_id] ?? "—",
       ownerId: p.user_id as string,
-      emoji: speciesEmoji(p.species ?? ""),
       createdAt: p.created_at,
     })),
     speciesData: Object.entries(speciesMap).map(([name, value]) => ({ name, value })),
